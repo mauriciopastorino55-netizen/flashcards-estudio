@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flashcards-estudio-v1';
+const CACHE_NAME = 'flashcards-estudio-v2';
 const ASSETS = [
   './',
   './index.html',

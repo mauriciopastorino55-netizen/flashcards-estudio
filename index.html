@@ -293,7 +293,43 @@
       background: linear-gradient(135deg, #ffffff 15%, var(--accent-2) 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 4px 18px color-mix(in srgb, var(--accent-2) 30%, transparent));
+    }
+
+    /* Aviso de vuelta completa */
+    .round-toast {
+      position: fixed;
+      top: max(62px, calc(env(safe-area-inset-top) + 52px));
+      left: 50%;
+      transform: translate(-50%, -18px) scale(0.94);
+      z-index: 30;
+      padding: 10px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 85%, #000), color-mix(in srgb, var(--accent-2) 80%, #000));
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 24px color-mix(in srgb, var(--accent-2) 40%, transparent);
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+    }
+
+    .round-toast.show {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+
+    @keyframes pulseCelebrate {
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 60%, transparent); }
+      70% { box-shadow: 0 0 0 22px rgba(34, 211, 238, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
+    }
+
+    .card-wrapper.celebrate .face {
+      animation: pulseCelebrate 0.75s ease-out;
     }
 
     .author-pill {
@@ -544,6 +580,7 @@
 </head>
 <body>
   <div class="bg-glow"></div>
+  <div class="round-toast" id="roundToast"></div>
 
   <div class="app">
     <header class="topbar">
@@ -690,6 +727,8 @@
     let lastId = null;
     let history = [];
     let historyIndex = -1;
+    let rounds = 0;
+    let toastTimer = null;
     let isTransitioning = false;
     let isInverted = localStorage.getItem("flashcards_inverted") === "1";
 
@@ -775,6 +814,7 @@
       lastId = null;
       history = [];
       historyIndex = -1;
+      rounds = 0;
       card.style.transition = "none";
       card.classList.remove("is-flipped");
       loadNextItem();
@@ -798,11 +838,26 @@
       document.documentElement.style.setProperty("--accent-2", palette[1]);
     }
 
+    function showRoundToast(roundNum) {
+      const toast = document.getElementById("roundToast");
+      toast.textContent = `¡Mazo completo! Vuelta ${roundNum} · Mezclando de nuevo`;
+      toast.classList.add("show");
+      cardWrapper.classList.remove("celebrate");
+      void cardWrapper.offsetWidth;
+      cardWrapper.classList.add("celebrate");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toast.classList.remove("show");
+        cardWrapper.classList.remove("celebrate");
+      }, 2600);
+    }
+
     function renderEntry(entry, number) {
-      const { item, palette } = entry;
-      counterPill.textContent = `#${number}`;
-      frontNum.textContent = `${item.id} / ${items.length}`;
-      backNum.textContent = `${item.id} / ${items.length}`;
+      const { item, palette, round } = entry;
+      const posInRound = ((number - 1) % items.length) + 1;
+      counterPill.textContent = `${posInRound}/${items.length} · V${round + 1}`;
+      frontNum.textContent = "";
+      backNum.textContent = "";
 
       if (isInverted) {
         frontBadge.textContent = "Tópico";
@@ -835,12 +890,20 @@
       if (historyIndex < history.length - 1) {
         historyIndex++;
       } else {
-        if (bag.length === 0) refillBag();
+        let justCompletedRound = false;
+        if (bag.length === 0) {
+          if (history.length > 0) {
+            rounds++;
+            justCompletedRound = true;
+          }
+          refillBag();
+        }
         const item = bag.shift();
         lastId = item.id;
         const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)];
-        history.push({ item, palette });
+        history.push({ item, palette, round: rounds });
         historyIndex = history.length - 1;
+        if (justCompletedRound) showRoundToast(rounds);
       }
       renderEntry(history[historyIndex], historyIndex + 1);
     }
