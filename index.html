@@ -11,6 +11,18 @@
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
   <link rel="apple-touch-icon" href="./icon-192.png" />
   <style>
+    @property --accent {
+      syntax: "<color>";
+      inherits: true;
+      initial-value: #7c5cff;
+    }
+
+    @property --accent-2 {
+      syntax: "<color>";
+      inherits: true;
+      initial-value: #22d3ee;
+    }
+
     :root {
       --bg: #090b10;
       --surface: #121622;
@@ -19,8 +31,15 @@
       --muted: #8b95b0;
       --accent: #7c5cff;
       --accent-2: #22d3ee;
+      --prev-accent: #7c5cff;
+      --prev-accent-2: #22d3ee;
       --front-size: 20px;
       --back-size: 28px;
+      --author-size: 16px;
+      --btn-fx-dur: 0.55s;
+      --topbar-fx-dur: 0.6s;
+      --topbar-fx-int: 0.85;
+      transition: --accent var(--btn-fx-dur) ease, --accent-2 var(--btn-fx-dur) ease;
     }
 
     * {
@@ -63,11 +82,82 @@
 
     /* Header */
     .topbar {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
       flex-shrink: 0;
+      overflow: hidden;
+      border-radius: 12px;
+      padding: 4px 2px 6px;
+    }
+
+    .topbar::after {
+      content: "";
+      position: absolute;
+      top: -20%;
+      bottom: -20%;
+      left: 0;
+      width: 64px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--accent-2) 18%, transparent) 30%,
+        rgba(255, 255, 255, 0.52) 50%,
+        color-mix(in srgb, var(--accent-2) 18%, transparent) 70%,
+        transparent 100%
+      );
+      transform: translateX(-120px) skewX(-24deg);
+      pointer-events: none;
+      opacity: 0;
+      filter: blur(0.4px);
+    }
+
+    .topbar::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 96px;
+      height: 1.5px;
+      border-radius: 999px;
+      background: linear-gradient(
+        90deg,
+        transparent 0%,
+        color-mix(in srgb, var(--accent-2) 60%, transparent) 35%,
+        rgba(255, 255, 255, 0.9) 55%,
+        color-mix(in srgb, var(--accent-2) 70%, transparent) 75%,
+        transparent 100%
+      );
+      box-shadow: 0 0 8px color-mix(in srgb, var(--accent-2) 75%, transparent);
+      transform: translateX(-110px);
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .topbar.flash-glint::after,
+    .topbar.flash-glint-spark::after {
+      animation: topbarGlint var(--topbar-fx-dur) cubic-bezier(0.25, 0.85, 0.35, 1) forwards;
+    }
+
+    .topbar.flash-spark::before,
+    .topbar.flash-glint-spark::before {
+      animation: topbarSpark var(--topbar-fx-dur) cubic-bezier(0.25, 0.85, 0.35, 1) forwards;
+    }
+
+    @keyframes topbarGlint {
+      0% { transform: translateX(-90px) skewX(-24deg); opacity: 0; }
+      18% { opacity: var(--topbar-fx-int); }
+      82% { opacity: calc(var(--topbar-fx-int) * 0.92); }
+      100% { transform: translateX(calc(100vw + 40px)) skewX(-24deg); opacity: 0; }
+    }
+
+    @keyframes topbarSpark {
+      0% { transform: translateX(-100px); opacity: 0; }
+      15% { opacity: var(--topbar-fx-int); }
+      85% { opacity: calc(var(--topbar-fx-int) * 0.95); }
+      100% { transform: translateX(calc(100vw + 20px)); opacity: 0; }
     }
 
     .brand {
@@ -211,6 +301,14 @@
 
     .face-back {
       transform: rotateY(180deg);
+    }
+
+    .card:not(.is-flipped) .face-back,
+    .card.is-flipped .face-front {
+      pointer-events: none;
+    }
+
+    .face.is-concept-face {
       background: linear-gradient(155deg, color-mix(in srgb, var(--accent) 16%, var(--surface-2)) 0%, var(--surface) 100%);
       border-color: color-mix(in srgb, var(--accent-2) 50%, rgba(255,255,255,0.1));
       box-shadow:
@@ -239,7 +337,7 @@
       border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
     }
 
-    .face-back .badge {
+    .face.is-concept-face .badge {
       background: color-mix(in srgb, var(--accent-2) 20%, transparent);
       color: color-mix(in srgb, var(--accent-2) 75%, #ffffff);
       border-color: color-mix(in srgb, var(--accent-2) 45%, transparent);
@@ -258,6 +356,9 @@
       flex-direction: column;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+      transform: translateZ(0);
       padding: 16px 2px;
       z-index: 1;
       scrollbar-width: none;
@@ -275,7 +376,7 @@
       gap: 14px;
     }
 
-    .front-text {
+    .style-def {
       font-size: var(--front-size);
       line-height: 1.48;
       color: var(--text);
@@ -284,7 +385,7 @@
       width: 100%;
     }
 
-    .back-text {
+    .style-concept {
       font-size: var(--back-size);
       line-height: 1.28;
       font-weight: 800;
@@ -314,7 +415,7 @@
       white-space: nowrap;
       opacity: 0;
       pointer-events: none;
-      transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
     }
 
     .round-toast.show {
@@ -335,9 +436,9 @@
     .author-pill {
       align-self: center;
       display: inline-block;
-      padding: 6px 14px;
+      padding: 7px 16px;
       border-radius: 999px;
-      font-size: 13px;
+      font-size: var(--author-size);
       font-weight: 700;
       letter-spacing: 0.3px;
       color: #ffffff;
@@ -369,6 +470,8 @@
     }
 
     .btn-next {
+      position: relative;
+      overflow: hidden;
       flex: 1;
       border: none;
       border-radius: 18px;
@@ -379,12 +482,116 @@
       background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
       box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 35%, transparent);
       cursor: pointer;
-      transition: transform 0.15s ease, filter 0.2s ease;
+      transition: transform 0.15s ease, filter 0.2s ease, box-shadow var(--btn-fx-dur) ease;
+    }
+
+    .btn-next .btn-label {
+      position: relative;
+      z-index: 2;
+    }
+
+    .btn-next::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, var(--prev-accent) 0%, var(--prev-accent-2) 100%);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .btn-next::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        110deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.34) 50%,
+        transparent 100%
+      );
+      transform: translateX(-120%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .btn-next.fx-wipe::before {
+      opacity: 1;
+      animation: btnWipe var(--btn-fx-dur) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .btn-next.fx-pulse::after {
+      animation: btnPulseSweep var(--btn-fx-dur) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes btnWipe {
+      0% { clip-path: inset(0 0 0 0); opacity: 1; }
+      100% { clip-path: inset(0 0 0 100%); opacity: 1; }
+    }
+
+    @keyframes btnPulseSweep {
+      0% { transform: translateX(-120%); opacity: 0.9; }
+      100% { transform: translateX(120%); opacity: 0; }
     }
 
     .btn-next:active {
       transform: scale(0.97);
       filter: brightness(1.1);
+    }
+
+    /* Segmented options inside settings */
+    .seg-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px 14px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+    }
+
+    .seg-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .seg-label {
+      font-size: 13px;
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .seg-group.is-disabled .seg-options,
+    .seg-group.is-disabled .seg-speed {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+
+    .seg-options {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .seg-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      border-radius: 10px;
+      padding: 8px 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .seg-btn.active {
+      background: color-mix(in srgb, var(--accent-2) 18%, rgba(255, 255, 255, 0.06));
+      border-color: var(--accent-2);
+      color: var(--text);
     }
 
     /* Drawers */
@@ -590,55 +797,59 @@
       </div>
       <div class="top-actions">
         <button class="btn-icon" id="openDecks" aria-label="Mazos">Mazos</button>
-        <button class="btn-icon" id="openSettings" aria-label="Tamaño de letra">Aa</button>
+        <button class="btn-icon" id="openSettings" aria-label="Ajustes" style="display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+        </button>
       </div>
     </header>
 
     <main class="stage" id="stage">
       <div class="card-wrapper" id="cardWrapper">
         <div class="card" id="card">
-          <div class="face face-front">
+          <div class="face face-front" id="frontFace">
             <div class="face-header">
               <span class="badge" id="frontBadge">Definición</span>
               <span class="num-tag" id="frontNum"></span>
             </div>
             <div class="face-body">
               <div class="face-center-wrap">
-                <div class="front-text" id="frontText"></div>
+                <div class="style-def" id="frontText"></div>
+                <div class="author-pill" id="frontAuthorPill"></div>
               </div>
             </div>
-            <div class="face-footer">Tocá para revelar · Deslizá izq/der</div>
           </div>
 
-          <div class="face face-back">
+          <div class="face face-back is-concept-face" id="backFace">
             <div class="face-header">
-              <span class="badge" id="backBadge">Tópico</span>
+              <span class="badge" id="backBadge">Concepto</span>
               <span class="num-tag" id="backNum"></span>
             </div>
             <div class="face-body">
               <div class="face-center-wrap">
-                <div class="back-text" id="backText"></div>
-                <div class="author-pill" id="authorPill"></div>
+                <div class="style-concept" id="backText"></div>
+                <div class="author-pill" id="backAuthorPill"></div>
               </div>
             </div>
-            <div class="face-footer">Tocá para volver · Deslizá para atrás o adelante</div>
           </div>
         </div>
       </div>
     </main>
 
     <footer class="controls">
-      <button class="btn-next" id="nextBtn">Siguiente tarjeta →</button>
+      <button class="btn-next" id="nextBtn"><span class="btn-label">Siguiente tarjeta →</span></button>
     </footer>
   </div>
 
   <!-- Backdrop -->
   <div class="drawer-backdrop" id="backdrop"></div>
 
-  <!-- Drawer Tamaño de letra y Modo -->
+  <!-- Drawer Ajustes -->
   <section class="drawer" id="settingsDrawer" aria-hidden="true">
     <div class="drawer-head">
-      <div class="drawer-title">Ajustes de lectura</div>
+      <div class="drawer-title">Ajustes</div>
       <button class="btn-icon" id="closeSettings">Listo</button>
     </div>
 
@@ -658,8 +869,61 @@
       <input type="range" id="backSlider" min="18" max="46" step="1" value="28" />
     </div>
 
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Etiqueta (Autores)</span>
+        <span id="authorSizeVal">16 px</span>
+      </div>
+      <input type="range" id="authorSlider" min="12" max="26" step="1" value="16" />
+    </div>
+
+    <div class="seg-group" id="btnFxSection">
+      <div class="seg-head" id="btnFxToggleRow">
+        <span class="seg-label">Transición del botón</span>
+        <div class="switch" id="btnFxSwitch"></div>
+      </div>
+      <div class="seg-options" id="btnFxGroup">
+        <button type="button" class="seg-btn" data-fx="fade">Fundido</button>
+        <button type="button" class="seg-btn" data-fx="wipe">Barrido</button>
+        <button type="button" class="seg-btn" data-fx="pulse">Fundido + pulso</button>
+      </div>
+      <div class="slider-group seg-speed">
+        <div class="slider-label">
+          <span>Velocidad</span>
+          <span id="btnSpeedVal">100% (Máx)</span>
+        </div>
+        <input type="range" id="btnSpeedSlider" min="25" max="100" step="5" value="100" />
+      </div>
+    </div>
+
+    <div class="seg-group" id="topbarFxSection">
+      <div class="seg-head" id="topbarFxToggleRow">
+        <span class="seg-label">Destello en barra superior</span>
+        <div class="switch" id="topbarFxSwitch"></div>
+      </div>
+      <div class="seg-options" id="topbarFxGroup">
+        <button type="button" class="seg-btn" data-fx="glint">Destello fino</button>
+        <button type="button" class="seg-btn" data-fx="spark">Chispa en borde</button>
+        <button type="button" class="seg-btn" data-fx="glint-spark">Destello + filo</button>
+      </div>
+      <div class="slider-group seg-speed">
+        <div class="slider-label">
+          <span>Velocidad</span>
+          <span id="topbarSpeedVal">100% (Máx)</span>
+        </div>
+        <input type="range" id="topbarSpeedSlider" min="25" max="100" step="5" value="100" />
+      </div>
+      <div class="slider-group seg-speed">
+        <div class="slider-label">
+          <span>Intensidad</span>
+          <span id="topbarIntVal">85%</span>
+        </div>
+        <input type="range" id="topbarIntSlider" min="15" max="100" step="5" value="85" />
+      </div>
+    </div>
+
     <div class="toggle-row" id="invertRow">
-      <span>Invertir caras (Tópico → Definición)</span>
+      <span>Invertir caras (Concepto → Definición)</span>
       <div class="switch" id="invertSwitch"></div>
     </div>
   </section>
@@ -723,6 +987,8 @@
     if (!decks.find(d => d.id === activeDeckId)) activeDeckId = decks[0].id;
 
     let items = [];
+    let activeFrontLabel = "Definición";
+    let activeBackLabel = "Concepto";
     let bag = [];
     let lastId = null;
     let history = [];
@@ -734,11 +1000,14 @@
 
     const card = document.getElementById("card");
     const cardWrapper = document.getElementById("cardWrapper");
+    const frontFace = document.getElementById("frontFace");
+    const backFace = document.getElementById("backFace");
     const frontText = document.getElementById("frontText");
     const backText = document.getElementById("backText");
     const frontBadge = document.getElementById("frontBadge");
     const backBadge = document.getElementById("backBadge");
-    const authorPill = document.getElementById("authorPill");
+    const frontAuthorPill = document.getElementById("frontAuthorPill");
+    const backAuthorPill = document.getElementById("backAuthorPill");
     const frontNum = document.getElementById("frontNum");
     const backNum = document.getElementById("backNum");
     const counterPill = document.getElementById("counterPill");
@@ -763,6 +1032,8 @@
     function parseMarkdownToItems(mdText) {
       const lines = mdText.replace(/\r\n/g, "\n").split("\n");
       const parsed = [];
+      let frontLabel = "";
+      let backLabel = "";
       let currentTitle = null;
       let currentBody = [];
 
@@ -798,10 +1069,15 @@
         } else if (currentTitle) {
           if (line.trim() === "---") continue;
           currentBody.push(line.replace(/^\s*[-*]\s+/, ""));
+        } else {
+          const fm = line.match(/^(?:Etiqueta\s+)?Frente\s*:\s*(.+)$/i);
+          if (fm) { frontLabel = fm[1].trim(); continue; }
+          const bm = line.match(/^(?:Etiqueta\s+)?Dorso\s*:\s*(.+)$/i);
+          if (bm) { backLabel = bm[1].trim(); continue; }
         }
       }
       flush();
-      return parsed;
+      return { items: parsed, frontLabel, backLabel };
     }
 
     function selectDeck(deckId) {
@@ -809,6 +1085,8 @@
       activeDeckId = deck.id;
       localStorage.setItem(STORAGE_ACTIVE_KEY, activeDeckId);
       items = deck.items;
+      activeFrontLabel = deck.frontLabel || "Definición";
+      activeBackLabel = deck.backLabel || "Concepto";
       deckTitle.textContent = deck.name;
       bag = [];
       lastId = null;
@@ -833,14 +1111,55 @@
       }
     }
 
+    let btnFx = localStorage.getItem("flashcards_btn_fx") || "fade";
+    let btnFxEnabled = localStorage.getItem("flashcards_btn_fx_on") !== "0";
+    let btnSpeed = Number(localStorage.getItem("flashcards_btn_speed") || 100);
+
+    let topbarFx = localStorage.getItem("flashcards_topbar_fx") || "glint";
+    if (!["glint", "spark", "glint-spark"].includes(topbarFx)) topbarFx = "glint";
+    let topbarFxEnabled = localStorage.getItem("flashcards_topbar_fx_on") !== "0";
+    let topbarSpeed = Number(localStorage.getItem("flashcards_topbar_speed") || 100);
+    let topbarIntensity = Number(localStorage.getItem("flashcards_topbar_int") || 85);
+
+    let currentPalette = PALETTES[0];
+    const topbarEl = document.querySelector(".topbar");
+
+    function applyFxDurations() {
+      const btnSec = btnFxEnabled ? (0.55 * (100 / btnSpeed)).toFixed(2) + "s" : "0s";
+      const topSec = (0.60 * (100 / topbarSpeed)).toFixed(2) + "s";
+      document.documentElement.style.setProperty("--btn-fx-dur", btnSec);
+      document.documentElement.style.setProperty("--topbar-fx-dur", topSec);
+      document.documentElement.style.setProperty("--topbar-fx-int", (topbarIntensity / 100).toFixed(2));
+    }
+
     function applyPalette(palette) {
+      document.documentElement.style.setProperty("--prev-accent", currentPalette[0]);
+      document.documentElement.style.setProperty("--prev-accent-2", currentPalette[1]);
+      currentPalette = palette;
       document.documentElement.style.setProperty("--accent", palette[0]);
       document.documentElement.style.setProperty("--accent-2", palette[1]);
     }
 
-    function showRoundToast(roundNum) {
+    function triggerCardChangeFx() {
+      nextBtn.classList.remove("fx-wipe", "fx-pulse");
+      void nextBtn.offsetWidth;
+      if (btnFxEnabled) {
+        if (btnFx === "wipe") nextBtn.classList.add("fx-wipe");
+        else if (btnFx === "pulse") nextBtn.classList.add("fx-pulse");
+      }
+
+      topbarEl.classList.remove("flash-glint", "flash-spark", "flash-glint-spark");
+      void topbarEl.offsetWidth;
+      if (topbarFxEnabled) {
+        if (topbarFx === "glint") topbarEl.classList.add("flash-glint");
+        else if (topbarFx === "spark") topbarEl.classList.add("flash-spark");
+        else if (topbarFx === "glint-spark") topbarEl.classList.add("flash-glint-spark");
+      }
+    }
+
+    function showRoundToast() {
       const toast = document.getElementById("roundToast");
-      toast.textContent = `¡Mazo completo! Vuelta ${roundNum} · Mezclando de nuevo`;
+      toast.textContent = "Mazo completado";
       toast.classList.add("show");
       cardWrapper.classList.remove("celebrate");
       void cardWrapper.offsetWidth;
@@ -849,7 +1168,7 @@
       toastTimer = setTimeout(() => {
         toast.classList.remove("show");
         cardWrapper.classList.remove("celebrate");
-      }, 2600);
+      }, 1650);
     }
 
     function renderEntry(entry, number) {
@@ -860,28 +1179,28 @@
       backNum.textContent = "";
 
       if (isInverted) {
-        frontBadge.textContent = "Tópico";
-        backBadge.textContent = "Definición";
+        frontFace.classList.add("is-concept-face");
+        backFace.classList.remove("is-concept-face");
+        frontBadge.textContent = activeBackLabel;
+        backBadge.textContent = activeFrontLabel;
+        frontText.className = "style-concept";
+        backText.className = "style-def";
         frontText.textContent = item.topic;
-        frontText.style.textAlign = "center";
-        frontText.style.fontWeight = "800";
         backText.textContent = item.def;
-        backText.style.fontSize = "var(--front-size)";
-        backText.style.fontWeight = "500";
-        backText.style.textAlign = "left";
+        frontAuthorPill.textContent = item.authors || "";
+        backAuthorPill.textContent = "";
       } else {
-        frontBadge.textContent = "Definición";
-        backBadge.textContent = "Tópico";
+        frontFace.classList.remove("is-concept-face");
+        backFace.classList.add("is-concept-face");
+        frontBadge.textContent = activeFrontLabel;
+        backBadge.textContent = activeBackLabel;
+        frontText.className = "style-def";
+        backText.className = "style-concept";
         frontText.textContent = item.def;
-        frontText.style.textAlign = "left";
-        frontText.style.fontWeight = "450";
         backText.textContent = item.topic;
-        backText.style.fontSize = "var(--back-size)";
-        backText.style.fontWeight = "800";
-        backText.style.textAlign = "center";
+        frontAuthorPill.textContent = "";
+        backAuthorPill.textContent = item.authors || "";
       }
-
-      authorPill.textContent = item.authors || "";
       document.querySelectorAll(".face-body").forEach(el => (el.scrollTop = 0));
       applyPalette(palette);
     }
@@ -921,6 +1240,7 @@
         card.style.transition = "none";
         card.classList.remove("is-flipped");
         updateFn();
+        triggerCardChangeFx();
 
         cardWrapper.classList.remove(outClass);
         cardWrapper.classList.add(prepClass);
@@ -1000,8 +1320,10 @@
     // Tamaño de letra e invertir
     const frontSlider = document.getElementById("frontSlider");
     const backSlider = document.getElementById("backSlider");
+    const authorSlider = document.getElementById("authorSlider");
     const frontSizeVal = document.getElementById("frontSizeVal");
     const backSizeVal = document.getElementById("backSizeVal");
+    const authorSizeVal = document.getElementById("authorSizeVal");
     const invertSwitch = document.getElementById("invertSwitch");
 
     function setFrontSize(px) {
@@ -1018,13 +1340,23 @@
       localStorage.setItem("apolonio_back_size", px);
     }
 
+    function setAuthorSize(px) {
+      document.documentElement.style.setProperty("--author-size", `${px}px`);
+      authorSizeVal.textContent = `${px} px`;
+      authorSlider.value = px;
+      localStorage.setItem("flashcards_author_size", px);
+    }
+
     const savedFront = localStorage.getItem("apolonio_front_size");
     const savedBack = localStorage.getItem("apolonio_back_size");
+    const savedAuthor = localStorage.getItem("flashcards_author_size");
     if (savedFront) setFrontSize(savedFront);
     if (savedBack) setBackSize(savedBack);
+    if (savedAuthor) setAuthorSize(savedAuthor);
 
     frontSlider.addEventListener("input", (e) => setFrontSize(e.target.value));
     backSlider.addEventListener("input", (e) => setBackSize(e.target.value));
+    authorSlider.addEventListener("input", (e) => setAuthorSize(e.target.value));
 
     invertSwitch.classList.toggle("on", isInverted);
     document.getElementById("invertRow").addEventListener("click", () => {
@@ -1033,6 +1365,92 @@
       localStorage.setItem("flashcards_inverted", isInverted ? "1" : "0");
       if (history[historyIndex]) renderEntry(history[historyIndex], historyIndex + 1);
     });
+
+    function initSegGroup(groupId, storageKey, currentVal, onChange) {
+      const group = document.getElementById(groupId);
+      const btns = Array.from(group.querySelectorAll(".seg-btn"));
+      const sync = (val) => {
+        btns.forEach(b => b.classList.toggle("active", b.dataset.fx === val));
+      };
+      sync(currentVal);
+      btns.forEach(btn => {
+        btn.addEventListener("click", () => {
+          const val = btn.dataset.fx;
+          onChange(val);
+          localStorage.setItem(storageKey, val);
+          sync(val);
+          triggerCardChangeFx();
+        });
+      });
+    }
+
+    initSegGroup("btnFxGroup", "flashcards_btn_fx", btnFx, (val) => { btnFx = val; });
+    initSegGroup("topbarFxGroup", "flashcards_topbar_fx", topbarFx, (val) => { topbarFx = val; });
+
+    const btnFxSection = document.getElementById("btnFxSection");
+    const btnFxSwitch = document.getElementById("btnFxSwitch");
+    const btnSpeedSlider = document.getElementById("btnSpeedSlider");
+    const btnSpeedVal = document.getElementById("btnSpeedVal");
+
+    const topbarFxSection = document.getElementById("topbarFxSection");
+    const topbarFxSwitch = document.getElementById("topbarFxSwitch");
+    const topbarSpeedSlider = document.getElementById("topbarSpeedSlider");
+    const topbarSpeedVal = document.getElementById("topbarSpeedVal");
+    const topbarIntSlider = document.getElementById("topbarIntSlider");
+    const topbarIntVal = document.getElementById("topbarIntVal");
+
+    function syncFxUI() {
+      btnFxSwitch.classList.toggle("on", btnFxEnabled);
+      btnFxSection.classList.toggle("is-disabled", !btnFxEnabled);
+      btnSpeedSlider.value = btnSpeed;
+      btnSpeedVal.textContent = btnSpeed === 100 ? "100% (Máx)" : `${btnSpeed}%`;
+
+      topbarFxSwitch.classList.toggle("on", topbarFxEnabled);
+      topbarFxSection.classList.toggle("is-disabled", !topbarFxEnabled);
+      topbarSpeedSlider.value = topbarSpeed;
+      topbarSpeedVal.textContent = topbarSpeed === 100 ? "100% (Máx)" : `${topbarSpeed}%`;
+      topbarIntSlider.value = topbarIntensity;
+      topbarIntVal.textContent = `${topbarIntensity}%`;
+
+      applyFxDurations();
+    }
+
+    document.getElementById("btnFxToggleRow").addEventListener("click", () => {
+      btnFxEnabled = !btnFxEnabled;
+      localStorage.setItem("flashcards_btn_fx_on", btnFxEnabled ? "1" : "0");
+      syncFxUI();
+    });
+
+    document.getElementById("topbarFxToggleRow").addEventListener("click", () => {
+      topbarFxEnabled = !topbarFxEnabled;
+      localStorage.setItem("flashcards_topbar_fx_on", topbarFxEnabled ? "1" : "0");
+      syncFxUI();
+      if (topbarFxEnabled) triggerCardChangeFx();
+    });
+
+    btnSpeedSlider.addEventListener("input", (e) => {
+      btnSpeed = Number(e.target.value);
+      localStorage.setItem("flashcards_btn_speed", btnSpeed);
+      syncFxUI();
+    });
+
+    topbarSpeedSlider.addEventListener("input", (e) => {
+      topbarSpeed = Number(e.target.value);
+      localStorage.setItem("flashcards_topbar_speed", topbarSpeed);
+      syncFxUI();
+    });
+
+    topbarIntSlider.addEventListener("input", (e) => {
+      topbarIntensity = Number(e.target.value);
+      localStorage.setItem("flashcards_topbar_int", topbarIntensity);
+      syncFxUI();
+    });
+
+    topbarIntSlider.addEventListener("change", () => {
+      if (topbarFxEnabled) triggerCardChangeFx();
+    });
+
+    syncFxUI();
 
     // Mazos y carga .md
     function renderDeckList() {
@@ -1070,13 +1488,20 @@
     }
 
     function importMarkdownText(text, filename) {
-      const parsed = parseMarkdownToItems(text);
+      const { items: parsed, frontLabel, backLabel } = parseMarkdownToItems(text);
       if (parsed.length === 0) {
         alert("No encontré tarjetas válidas. Usá encabezados ### Título y la definición debajo.");
         return;
       }
       const cleanName = (filename || "Nuevo mazo").replace(/\.(md|markdown|txt)$/i, "");
-      const newDeck = { id: "deck_" + Date.now(), name: cleanName, items: parsed, builtin: false };
+      const newDeck = {
+        id: "deck_" + Date.now(),
+        name: cleanName,
+        items: parsed,
+        frontLabel: frontLabel || "Definición",
+        backLabel: backLabel || "Concepto",
+        builtin: false
+      };
       decks.push(newDeck);
       saveDecks();
       selectDeck(newDeck.id);

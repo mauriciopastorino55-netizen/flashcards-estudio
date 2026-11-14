@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flashcards-estudio-v2';
+const CACHE_NAME = 'flashcards-estudio-v14';
 const ASSETS = [
   './',
   './index.html',
@@ -47,6 +47,22 @@ self.addEventListener('fetch', event => {
   }
 
   if (!event.request.url.startsWith(self.location.origin)) return;
+
+  const isHtml = event.request.mode === 'navigate' || event.request.url.endsWith('.html') || event.request.url.endsWith('/');
+  if (isHtml) {
+    event.respondWith(
+      fetch(event.request)
+        .then(response => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => {
