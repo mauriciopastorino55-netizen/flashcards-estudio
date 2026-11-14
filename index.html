@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#090b10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <title>Flashcards Estudio</title>
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
+  <style>
+    :root {
+      --bg: #090b10;
+      --surface: #121622;
+      --surface-2: #191f30;
+      --text: #eef2ff;
+      --muted: #8b95b0;
+      --accent: #7c5cff;
+      --accent-2: #22d3ee;
+      --front-size: 20px;
+      --back-size: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100dvh;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    }
+
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 45%),
+        radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--accent-2) 14%, transparent), transparent 45%);
+      transition: background 0.6s ease;
+    }
+
+    .app {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      padding: max(12px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+      gap: 12px;
+    }
+
+    /* Header */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .counter-pill {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 11px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent-2);
+      letter-spacing: 0.3px;
+      flex-shrink: 0;
+    }
+
+    .title-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.2s ease;
+    }
+
+    .btn-icon:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    /* Escenario de la tarjeta */
+    .stage {
+      flex: 1;
+      min-height: 0;
+      position: relative;
+      perspective: 1400px;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+    }
+
+    .card-wrapper {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.26s ease;
+    }
+
+    .card-wrapper.slide-out {
+      transform: translateX(-108%) rotate(-4deg) scale(0.95);
+      opacity: 0;
+    }
+
+    .card-wrapper.slide-in-prep {
+      transform: translateX(108%) rotate(4deg) scale(0.95);
+      opacity: 0;
+      transition: none !important;
+    }
+
+    .card-wrapper.slide-out-right {
+      transform: translateX(108%) rotate(4deg) scale(0.95);
+      opacity: 0;
+    }
+
+    .card-wrapper.slide-in-prep-left {
+      transform: translateX(-108%) rotate(-4deg) scale(0.95);
+      opacity: 0;
+      transition: none !important;
+    }
+
+    .card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+      cursor: pointer;
+    }
+
+    .card.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 26px;
+      padding: 24px 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background: linear-gradient(155deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%), var(--surface);
+      border: 1px solid color-mix(in srgb, var(--accent) 42%, rgba(255,255,255,0.08));
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.55),
+        0 0 36px color-mix(in srgb, var(--accent) 16%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      overflow: hidden;
+    }
+
+    .face::before {
+      content: "";
+      position: absolute;
+      top: -40%;
+      right: -30%;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent), transparent 70%);
+      pointer-events: none;
+    }
+
+    .face-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(155deg, color-mix(in srgb, var(--accent) 16%, var(--surface-2)) 0%, var(--surface) 100%);
+      border-color: color-mix(in srgb, var(--accent-2) 50%, rgba(255,255,255,0.1));
+      box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.6),
+        0 0 42px color-mix(in srgb, var(--accent-2) 20%, transparent),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .face-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      padding: 6px 11px;
+      border-radius: 999px;
+      background: color-mix(in srgb, var(--accent) 20%, transparent);
+      color: color-mix(in srgb, var(--accent) 70%, #ffffff);
+      border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+    }
+
+    .face-back .badge {
+      background: color-mix(in srgb, var(--accent-2) 20%, transparent);
+      color: color-mix(in srgb, var(--accent-2) 75%, #ffffff);
+      border-color: color-mix(in srgb, var(--accent-2) 45%, transparent);
+    }
+
+    .num-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .face-body {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding: 16px 2px;
+      z-index: 1;
+      scrollbar-width: none;
+    }
+
+    .face-body::-webkit-scrollbar {
+      display: none;
+    }
+
+    .face-center-wrap {
+      margin: auto 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .front-text {
+      font-size: var(--front-size);
+      line-height: 1.48;
+      color: var(--text);
+      font-weight: 450;
+      text-align: left;
+      width: 100%;
+    }
+
+    .back-text {
+      font-size: var(--back-size);
+      line-height: 1.28;
+      font-weight: 800;
+      text-align: center;
+      width: 100%;
+      background: linear-gradient(135deg, #ffffff 15%, var(--accent-2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 4px 18px color-mix(in srgb, var(--accent-2) 30%, transparent));
+    }
+
+    .author-pill {
+      align-self: center;
+      display: inline-block;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      color: #ffffff;
+      background: color-mix(in srgb, var(--accent) 26%, rgba(255,255,255,0.06));
+      border: 1px solid color-mix(in srgb, var(--accent-2) 45%, transparent);
+    }
+
+    .author-pill:empty {
+      display: none;
+    }
+
+    .face-footer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      z-index: 1;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 0.4px;
+      text-align: center;
+    }
+
+    /* Botón inferior */
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .btn-next {
+      flex: 1;
+      border: none;
+      border-radius: 18px;
+      padding: 16px 20px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 35%, transparent);
+      cursor: pointer;
+      transition: transform 0.15s ease, filter 0.2s ease;
+    }
+
+    .btn-next:active {
+      transform: scale(0.97);
+      filter: brightness(1.1);
+    }
+
+    /* Drawers */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 20;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 21;
+      background: #141926;
+      border-top: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 24px 24px 0 0;
+      padding: 20px 20px max(24px, env(safe-area-inset-bottom));
+      transform: translateY(105%);
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      max-height: 82dvh;
+      overflow-y: auto;
+    }
+
+    .drawer.open {
+      transform: translateY(0);
+    }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .slider-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slider-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .slider-label span:last-child {
+      color: var(--accent-2);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent-2);
+      height: 28px;
+      cursor: pointer;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .switch {
+      position: relative;
+      width: 46px;
+      height: 26px;
+      background: rgba(255,255,255,0.16);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .switch.on {
+      background: var(--accent-2);
+    }
+
+    .switch::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s;
+    }
+
+    .switch.on::after {
+      transform: translateX(20px);
+    }
+
+    .deck-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .deck-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.09);
+      cursor: pointer;
+    }
+
+    .deck-item.active {
+      border-color: var(--accent-2);
+      background: color-mix(in srgb, var(--accent-2) 14%, rgba(255,255,255,0.04));
+    }
+
+    .deck-info {
+      min-width: 0;
+    }
+
+    .deck-name {
+      font-size: 15px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .deck-meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .btn-del {
+      background: rgba(255, 80, 100, 0.16);
+      border: 1px solid rgba(255, 80, 100, 0.35);
+      color: #ff8fa3;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-upload {
+      width: 100%;
+      border: 1px dashed color-mix(in srgb, var(--accent-2) 60%, transparent);
+      background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .hint-md {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="counter-pill" id="counterPill">#1</span>
+        <span class="title-text" id="deckTitle">Apolonio</span>
+      </div>
+      <div class="top-actions">
+        <button class="btn-icon" id="openDecks" aria-label="Mazos">Mazos</button>
+        <button class="btn-icon" id="openSettings" aria-label="Tamaño de letra">Aa</button>
+      </div>
+    </header>
+
+    <main class="stage" id="stage">
+      <div class="card-wrapper" id="cardWrapper">
+        <div class="card" id="card">
+          <div class="face face-front">
+            <div class="face-header">
+              <span class="badge" id="frontBadge">Definición</span>
+              <span class="num-tag" id="frontNum"></span>
+            </div>
+            <div class="face-body">
+              <div class="face-center-wrap">
+                <div class="front-text" id="frontText"></div>
+              </div>
+            </div>
+            <div class="face-footer">Tocá para revelar · Deslizá izq/der</div>
+          </div>
+
+          <div class="face face-back">
+            <div class="face-header">
+              <span class="badge" id="backBadge">Tópico</span>
+              <span class="num-tag" id="backNum"></span>
+            </div>
+            <div class="face-body">
+              <div class="face-center-wrap">
+                <div class="back-text" id="backText"></div>
+                <div class="author-pill" id="authorPill"></div>
+              </div>
+            </div>
+            <div class="face-footer">Tocá para volver · Deslizá para atrás o adelante</div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="controls">
+      <button class="btn-next" id="nextBtn">Siguiente tarjeta →</button>
+    </footer>
+  </div>
+
+  <!-- Backdrop -->
+  <div class="drawer-backdrop" id="backdrop"></div>
+
+  <!-- Drawer Tamaño de letra y Modo -->
+  <section class="drawer" id="settingsDrawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div class="drawer-title">Ajustes de lectura</div>
+      <button class="btn-icon" id="closeSettings">Listo</button>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Frente</span>
+        <span id="frontSizeVal">20 px</span>
+      </div>
+      <input type="range" id="frontSlider" min="14" max="34" step="1" value="20" />
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Reverso</span>
+        <span id="backSizeVal">28 px</span>
+      </div>
+      <input type="range" id="backSlider" min="18" max="46" step="1" value="28" />
+    </div>
+
+    <div class="toggle-row" id="invertRow">
+      <span>Invertir caras (Tópico → Definición)</span>
+      <div class="switch" id="invertSwitch"></div>
+    </div>
+  </section>
+
+  <!-- Drawer Mazos (.md) -->
+  <section class="drawer" id="decksDrawer" aria-hidden="true">
+    <div class="drawer-head">
+      <div class="drawer-title">Mazos (.md)</div>
+      <button class="btn-icon" id="closeDecks">Listo</button>
+    </div>
+
+    <label class="btn-upload">
+      + Cargar archivo .md desde el celular
+      <input type="file" id="mdFileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden />
+    </label>
+
+    <div class="deck-list" id="deckList"></div>
+
+    <div class="hint-md">
+      Formato compatible: encabezados <code>### Título</code> (o <code>## Título</code>) con la definición debajo. Si agregás <code>Autores: ...</code> al final de un bloque, aparece destacado en el reverso.
+    </div>
+  </section>
+
+  <script>
+    const DEFAULT_ITEMS = [
+      { id: 1, topic: "Cristianización", authors: "", def: "Es la adaptación de una historia pagana (la novela griega/latina Historia Apollonii Regis Tyri) al marco cristiano del siglo XIII. Se ve cuando el texto transforma elementos paganos o de aventura en signos religiosos: los tres días de Luciana en el mar (resurrección), el templo de Diana convertido en monasterio, la fiesta de Neptuno cambiada por el cumpleaños de Apolonio, el episodio del pescador o el ángel del final." },
+      { id: 2, topic: "Género (Novela de aventuras y hagiografía)", authors: "Brownlee · Deyermond · Zubillaga", def: "La obra cruza la novela griega de aventuras (viajes, naufragios, separaciones y reencuentros familiares) con la hagiografía (vidas de santos). Según Brownlee, no es un género puro sino una mezcla propia del mester de clerecía; según Zubillaga, Luciana y sobre todo Tarsiana siguen más de cerca el modelo de las santas cristianas, mientras que Apolonio debe hacer todo un recorrido de aprendizaje para llegar a esa sabiduría." },
+      { id: 3, topic: "Mester de clerecía y docere et delectare", authors: "", def: "Los clérigos buscan diferenciarse tanto de los monjes como de los juglares demostrando que pueden entretener (delectare) y enseñar (docere) al mismo tiempo. En el texto aparece en los juegos cortesanos, la música y las adivinanzas (que divierten y exigen ingenio tanto a los personajes como al lector), y en Tarsiana cuando elige ser juglaresa por ser un \"mester más sin pecado\" que la prostitución, siempre manteniendo una base letrada y noble." },
+      { id: 4, topic: "Ideal clerical / Erudición vs. sabiduría espiritual", authors: "", def: "Los protagonistas no resuelven las cosas con la espada sino con la erudición, la retórica y la música. Sin embargo, el texto marca que el saber intelectual y terrenal por sí solo no alcanza (como le pasa a Apolonio al principio); el verdadero ideal clerical une esa educación con la sabiduría espiritual orientada hacia Dios." },
+      { id: 5, topic: "Providencia vs. Fortuna", authors: "", def: "La Fortuna es la visión pagana y mundana del azar (la rueda que sube y baja, como plantean Estrángilo y Dionisia). La Providencia es el plan de Dios que guía los hechos aunque los personajes no lo vean; en la obra no opera con milagros sobrenaturales sino a través de hechos humanos o naturales (el viento que lleva el ataúd a Éfeso, el médico, los piratas, Antinágoras)." },
+      { id: 6, topic: "El mar como metáfora bautismal", authors: "Zubillaga", def: "El paso por el agua funciona como muerte simbólica y renacimiento hacia una nueva identidad espiritual. Apolonio naufraga y renace como peregrino; Luciana pasa tres días en el mar y renace como monja; Tarsiana es llevada por mar y pasa a defender su virginidad en una nueva prueba." },
+      { id: 7, topic: "Verdad y apariencia (corteza y meollo)", authors: "", def: "Es la oposición entre lo que se muestra por fuera y lo que realmente es, obligando a saber mirar más allá de las apariencias. Aparece en el pescador (pobre por fuera, sabio por dentro), en Apolonio (rey disfrazado de romero), en Tarsiana (princesa con aspecto de juglaresa), en Dionisia (que cree que la ropa da virtud) y en el cuerpo aparentemente muerto de Luciana." },
+      { id: 8, topic: "La escritura y los monumentos", authors: "", def: "La escritura y las inscripciones aparecen como capas que cifran una verdad o una identidad oculta que otro debe descifrar. Se ve en la carta cerrada con cera de Luciana, en la lámina de plomo del ataúd y en los monumentos: el de Apolonio en Tarso (que él lee mal), la tumba falsa de Tarsiana (donde Apolonio ya sabe ver la mentira) y la estatua de oro final en Mitilene (donde por fin coinciden apariencia y verdad)." },
+      { id: 9, topic: "Adivinanzas y retórica", authors: "Rodríguez Temperley · Phipps", def: "Las adivinanzas funcionan como ejercicio retórico, prueba de ingenio y cifra de identidades. Según Rodríguez Temperley, en la serie de Tarsiana las primeras seis remiten al agua/viajes y a la clerecía, mientras que las últimas tres (la pelota, el espejo y las ruedas) preanuncian la anagnórisis: muestran que ninguno es lo que parece, que padre e hija se reflejan sin reconocerse y que existe el peligro del incesto o de una familia que no logra juntarse." },
+      { id: 10, topic: "El incesto como motivo folclórico", authors: "Phipps · Deyermond", def: "Es el motivo folclórico central de la obra según Phipps. Aparece de forma explícita al principio con Antíoco y su hija, y luego queda como una amenaza latente sobre las demás relaciones padre-hija (como el juego de seducción intelectual entre Apolonio y Tarsiana antes de reconocerse, o el rol ambiguo de Antinágoras). Sirve para contrastar a los personajes que caen en el mal con los que logran evitarlo." },
+      { id: 11, topic: "La belleza incomparable de las princesas (motivo folclórico)", authors: "Deyermond", def: "Es un tópico folclórico tradicional por el cual la heroína supera a todas las demás mujeres en hermosura. Se aplica a la hija de Antíoco, a Luciana y a Tarsiana. En el Libro de Apolonio, el poeta lo combina con el ideal clerical: a Tarsiana no la quieren solo por linda, sino también por su educación y buenos modales." },
+      { id: 12, topic: "La madrastra envidiosa (motivo folclórico)", authors: "", def: "Es el esquema folclórico de la figura materna sustituta que odia y quiere eliminar a la joven protegida porque opaca a su propia hija. Lo encarna Dionisia respecto de Tarsiana cuando la gente en la calle las compara. En la obra, este motivo folclórico funciona como disparador narrativo que pone en marcha la aventura de Tarsiana." },
+      { id: 13, topic: "La muerte aparente (motivo folclórico)", authors: "Zubillaga", def: "Es el motivo tradicional del personaje que parece muerto sin estarlo, es abandonado o enterrado y luego vuelve a la vida. Aparece con Luciana tras el parto en el barco. El poeta toma este motivo folclórico y lo adapta agregando la explicación médica (sabiduría científica) y la simbología cristiana de los tres días en el mar." },
+      { id: 14, topic: "La prueba de pretendientes / casamiento desigual (motivo folclórico)", authors: "", def: "Es el motivo folclórico de la princesa que debe elegir esposo entre varios candidatos mediante pruebas o acertijos, o que elige a alguien de apariencia inferior (un maestro o peregrino) por encima de nobles ricos. Aparece tanto en Antioquía (el enigma de Antíoco) como en Pentápolis, donde Luciana rechaza a los tres pretendientes y elige casarse con Apolonio mediante una carta con acertijo." },
+      { id: 15, topic: "El pecado en cadena, el diablo y el dinero", authors: "", def: "El mal funciona como una cadena donde un pecado lleva a otro, impulsado por el diablo y ligado al dinero. Se ve en Antíoco (incesto y recompensa por matar a Apolonio) y en Dionisia y Estrángilo, caracterizados como burgueses vinculados al dinero y la avaricia: la envidia lleva al intento de asesinato, al engaño y a querer matar al sicario para no pagarle." },
+      { id: 16, topic: "Educación y rol femenino: Luciana y Tarsiana", authors: "Balestrini · Zubillaga", def: "Las mujeres funcionan en pares con los hombres y encarnan el ideal clerical tanto como ellos (Balestrini destaca el detalle de la educación de Tarsiana). A diferencia de Apolonio, su peligro específico es la deshonra sexual y su saber (música y retórica) tiene un efecto curativo sobre la melancolía de Apolonio y les sirve para defender su castidad y virginidad sin violencia física." },
+      { id: 17, topic: "Peregrinatio vitae, peregrino y ascesis (imitatio Christi)", authors: "Brownlee · Surtz", def: "Es la idea de la vida como un viaje de prueba espiritual. Apolonio falla cuando se aferra a su condición de rey frente al cadáver de Luciana, por lo que luego pasa diez años de vida ascética en el desierto de Egipto (imitando la tradición bíblica y de los santos) para adquirir la sabiduría espiritual que le faltaba y poder reconocer la verdad al volver." },
+      { id: 18, topic: "La muerte igualadora y el cierre moralizante", authors: "", def: "Es el tópico medieval de que todos los hombres son iguales ante la muerte y el juicio de Dios (como recuerda Antinágoras en el burdel). Al final de la obra, el narrador interpela directamente al lector para recordarle que todos vamos a morir y que cada uno recibirá en el más allá según lo que haya obrado en vida." },
+      { id: 19, topic: "Métrica (cuaderna vía)", authors: "", def: "Es la forma métrica del mester de clerecía: estrofas de cuatro versos alejandrinos (14 sílabas divididas en dos hemistiquios de 7+7) con una única rima consonante por estrofa (AAAA). Busca una lectura pausada y lenta, por lo que suelen usarse licencias que separan vocales (dialefa y diéresis)." }
+    ];
+
+    const PALETTES = [
+      ["#7c5cff", "#22d3ee"],
+      ["#ec4899", "#f59e0b"],
+      ["#10b981", "#38bdf8"],
+      ["#f97316", "#facc15"],
+      ["#6366f1", "#a855f7"],
+      ["#14b8a6", "#a3e635"]
+    ];
+
+    const STORAGE_DECKS_KEY = "flashcards_decks_v1";
+    const STORAGE_ACTIVE_KEY = "flashcards_active_deck_v1";
+
+    let decks = loadDecks();
+    let activeDeckId = localStorage.getItem(STORAGE_ACTIVE_KEY) || "apolonio";
+    if (!decks.find(d => d.id === activeDeckId)) activeDeckId = decks[0].id;
+
+    let items = [];
+    let bag = [];
+    let lastId = null;
+    let history = [];
+    let historyIndex = -1;
+    let isTransitioning = false;
+    let isInverted = localStorage.getItem("flashcards_inverted") === "1";
+
+    const card = document.getElementById("card");
+    const cardWrapper = document.getElementById("cardWrapper");
+    const frontText = document.getElementById("frontText");
+    const backText = document.getElementById("backText");
+    const frontBadge = document.getElementById("frontBadge");
+    const backBadge = document.getElementById("backBadge");
+    const authorPill = document.getElementById("authorPill");
+    const frontNum = document.getElementById("frontNum");
+    const backNum = document.getElementById("backNum");
+    const counterPill = document.getElementById("counterPill");
+    const deckTitle = document.getElementById("deckTitle");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function loadDecks() {
+      try {
+        const raw = localStorage.getItem(STORAGE_DECKS_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+      return [{ id: "apolonio", name: "Libro de Apolonio", items: DEFAULT_ITEMS, builtin: true }];
+    }
+
+    function saveDecks() {
+      localStorage.setItem(STORAGE_DECKS_KEY, JSON.stringify(decks));
+    }
+
+    function parseMarkdownToItems(mdText) {
+      const lines = mdText.replace(/\r\n/g, "\n").split("\n");
+      const parsed = [];
+      let currentTitle = null;
+      let currentBody = [];
+
+      const flush = () => {
+        if (!currentTitle) return;
+        let bodyText = currentBody.join("\n").trim();
+        if (!bodyText) return;
+
+        let authors = "";
+        const authMatch = bodyText.match(/(?:^|\n)(?:Autores?|Cr[íi]ticos?)\s*:\s*(.+)$/i);
+        if (authMatch) {
+          authors = authMatch[1].trim();
+          bodyText = bodyText.slice(0, authMatch.index).trim();
+        }
+
+        const cleanTitle = currentTitle.replace(/^\d+[\.\)]\s*/, "").replace(/[*_`]/g, "").trim();
+        const cleanBody = bodyText.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/`([^`]+)`/g, "$1");
+
+        parsed.push({
+          id: parsed.length + 1,
+          topic: cleanTitle,
+          authors,
+          def: cleanBody
+        });
+      };
+
+      for (const line of lines) {
+        const m = line.match(/^#{2,3}\s+(.+)$/);
+        if (m) {
+          flush();
+          currentTitle = m[1].trim();
+          currentBody = [];
+        } else if (currentTitle) {
+          if (line.trim() === "---") continue;
+          currentBody.push(line.replace(/^\s*[-*]\s+/, ""));
+        }
+      }
+      flush();
+      return parsed;
+    }
+
+    function selectDeck(deckId) {
+      const deck = decks.find(d => d.id === deckId) || decks[0];
+      activeDeckId = deck.id;
+      localStorage.setItem(STORAGE_ACTIVE_KEY, activeDeckId);
+      items = deck.items;
+      deckTitle.textContent = deck.name;
+      bag = [];
+      lastId = null;
+      history = [];
+      historyIndex = -1;
+      card.style.transition = "none";
+      card.classList.remove("is-flipped");
+      loadNextItem();
+      requestAnimationFrame(() => { card.style.transition = ""; });
+      renderDeckList();
+    }
+
+    function refillBag() {
+      bag = [...items];
+      for (let i = bag.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [bag[i], bag[j]] = [bag[j], bag[i]];
+      }
+      if (lastId !== null && bag[0].id === lastId && bag.length > 1) {
+        [bag[0], bag[bag.length - 1]] = [bag[bag.length - 1], bag[0]];
+      }
+    }
+
+    function applyPalette(palette) {
+      document.documentElement.style.setProperty("--accent", palette[0]);
+      document.documentElement.style.setProperty("--accent-2", palette[1]);
+    }
+
+    function renderEntry(entry, number) {
+      const { item, palette } = entry;
+      counterPill.textContent = `#${number}`;
+      frontNum.textContent = `${item.id} / ${items.length}`;
+      backNum.textContent = `${item.id} / ${items.length}`;
+
+      if (isInverted) {
+        frontBadge.textContent = "Tópico";
+        backBadge.textContent = "Definición";
+        frontText.textContent = item.topic;
+        frontText.style.textAlign = "center";
+        frontText.style.fontWeight = "800";
+        backText.textContent = item.def;
+        backText.style.fontSize = "var(--front-size)";
+        backText.style.fontWeight = "500";
+        backText.style.textAlign = "left";
+      } else {
+        frontBadge.textContent = "Definición";
+        backBadge.textContent = "Tópico";
+        frontText.textContent = item.def;
+        frontText.style.textAlign = "left";
+        frontText.style.fontWeight = "450";
+        backText.textContent = item.topic;
+        backText.style.fontSize = "var(--back-size)";
+        backText.style.fontWeight = "800";
+        backText.style.textAlign = "center";
+      }
+
+      authorPill.textContent = item.authors || "";
+      document.querySelectorAll(".face-body").forEach(el => (el.scrollTop = 0));
+      applyPalette(palette);
+    }
+
+    function loadNextItem() {
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+      } else {
+        if (bag.length === 0) refillBag();
+        const item = bag.shift();
+        lastId = item.id;
+        const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)];
+        history.push({ item, palette });
+        historyIndex = history.length - 1;
+      }
+      renderEntry(history[historyIndex], historyIndex + 1);
+    }
+
+    function transitionCard(direction, updateFn) {
+      if (isTransitioning) return;
+      isTransitioning = true;
+
+      const outClass = direction === "next" ? "slide-out" : "slide-out-right";
+      const prepClass = direction === "next" ? "slide-in-prep" : "slide-in-prep-left";
+
+      cardWrapper.classList.add(outClass);
+
+      setTimeout(() => {
+        card.style.transition = "none";
+        card.classList.remove("is-flipped");
+        updateFn();
+
+        cardWrapper.classList.remove(outClass);
+        cardWrapper.classList.add(prepClass);
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            card.style.transition = "";
+            cardWrapper.classList.remove(prepClass);
+            setTimeout(() => { isTransitioning = false; }, 300);
+          });
+        });
+      }, 240);
+    }
+
+    function goNext() { transitionCard("next", loadNextItem); }
+
+    function goPrev() {
+      if (historyIndex <= 0) return;
+      transitionCard("prev", () => {
+        historyIndex--;
+        renderEntry(history[historyIndex], historyIndex + 1);
+      });
+    }
+
+    card.addEventListener("click", () => {
+      if (isTransitioning) return;
+      card.classList.toggle("is-flipped");
+    });
+
+    nextBtn.addEventListener("click", goNext);
+
+    // Swipe direccional
+    let touchStartX = 0;
+    let touchStartY = 0;
+    const stage = document.getElementById("stage");
+
+    stage.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].clientX;
+      touchStartY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    stage.addEventListener("touchend", (e) => {
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
+      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        if (dx < 0) goNext();
+        else goPrev();
+      }
+    }, { passive: true });
+
+    // Drawers
+    const backdrop = document.getElementById("backdrop");
+    const settingsDrawer = document.getElementById("settingsDrawer");
+    const decksDrawer = document.getElementById("decksDrawer");
+
+    function closeAllDrawers() {
+      [settingsDrawer, decksDrawer].forEach(d => {
+        d.classList.remove("open");
+        d.setAttribute("aria-hidden", "true");
+      });
+      backdrop.classList.remove("open");
+    }
+
+    function openDrawer(drawer) {
+      closeAllDrawers();
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden", "false");
+      backdrop.classList.add("open");
+    }
+
+    document.getElementById("openSettings").addEventListener("click", () => openDrawer(settingsDrawer));
+    document.getElementById("closeSettings").addEventListener("click", closeAllDrawers);
+    document.getElementById("openDecks").addEventListener("click", () => { renderDeckList(); openDrawer(decksDrawer); });
+    document.getElementById("closeDecks").addEventListener("click", closeAllDrawers);
+    backdrop.addEventListener("click", closeAllDrawers);
+
+    // Tamaño de letra e invertir
+    const frontSlider = document.getElementById("frontSlider");
+    const backSlider = document.getElementById("backSlider");
+    const frontSizeVal = document.getElementById("frontSizeVal");
+    const backSizeVal = document.getElementById("backSizeVal");
+    const invertSwitch = document.getElementById("invertSwitch");
+
+    function setFrontSize(px) {
+      document.documentElement.style.setProperty("--front-size", `${px}px`);
+      frontSizeVal.textContent = `${px} px`;
+      frontSlider.value = px;
+      localStorage.setItem("apolonio_front_size", px);
+    }
+
+    function setBackSize(px) {
+      document.documentElement.style.setProperty("--back-size", `${px}px`);
+      backSizeVal.textContent = `${px} px`;
+      backSlider.value = px;
+      localStorage.setItem("apolonio_back_size", px);
+    }
+
+    const savedFront = localStorage.getItem("apolonio_front_size");
+    const savedBack = localStorage.getItem("apolonio_back_size");
+    if (savedFront) setFrontSize(savedFront);
+    if (savedBack) setBackSize(savedBack);
+
+    frontSlider.addEventListener("input", (e) => setFrontSize(e.target.value));
+    backSlider.addEventListener("input", (e) => setBackSize(e.target.value));
+
+    invertSwitch.classList.toggle("on", isInverted);
+    document.getElementById("invertRow").addEventListener("click", () => {
+      isInverted = !isInverted;
+      invertSwitch.classList.toggle("on", isInverted);
+      localStorage.setItem("flashcards_inverted", isInverted ? "1" : "0");
+      if (history[historyIndex]) renderEntry(history[historyIndex], historyIndex + 1);
+    });
+
+    // Mazos y carga .md
+    function renderDeckList() {
+      const list = document.getElementById("deckList");
+      list.innerHTML = "";
+      decks.forEach(deck => {
+        const row = document.createElement("div");
+        row.className = "deck-item" + (deck.id === activeDeckId ? " active" : "");
+
+        const info = document.createElement("div");
+        info.className = "deck-info";
+        info.innerHTML = `<div class="deck-name">${deck.name}</div><div class="deck-meta">${deck.items.length} tarjetas</div>`;
+        row.appendChild(info);
+
+        if (!deck.builtin) {
+          const del = document.createElement("button");
+          del.className = "btn-del";
+          del.textContent = "Borrar";
+          del.addEventListener("click", (e) => {
+            e.stopPropagation();
+            decks = decks.filter(d => d.id !== deck.id);
+            saveDecks();
+            if (activeDeckId === deck.id) selectDeck(decks[0].id);
+            else renderDeckList();
+          });
+          row.appendChild(del);
+        }
+
+        row.addEventListener("click", () => {
+          selectDeck(deck.id);
+          closeAllDrawers();
+        });
+        list.appendChild(row);
+      });
+    }
+
+    function importMarkdownText(text, filename) {
+      const parsed = parseMarkdownToItems(text);
+      if (parsed.length === 0) {
+        alert("No encontré tarjetas válidas. Usá encabezados ### Título y la definición debajo.");
+        return;
+      }
+      const cleanName = (filename || "Nuevo mazo").replace(/\.(md|markdown|txt)$/i, "");
+      const newDeck = { id: "deck_" + Date.now(), name: cleanName, items: parsed, builtin: false };
+      decks.push(newDeck);
+      saveDecks();
+      selectDeck(newDeck.id);
+      closeAllDrawers();
+    }
+
+    document.getElementById("mdFileInput").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      importMarkdownText(text, file.name);
+      e.target.value = "";
+    });
+
+    // Soporte PWA Share Target & File Handlers
+    async function checkExternalInputs() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("load_shared") === "1" && "caches" in window) {
+        try {
+          const cache = await caches.open("shared-files-v1");
+          const res = await cache.match("./shared-file");
+          if (res) {
+            const { text, name } = await res.json();
+            await cache.delete("./shared-file");
+            importMarkdownText(text, name);
+            window.history.replaceState({}, "", "./index.html");
+          }
+        } catch {}
+      }
+      if ("launchQueue" in window) {
+        window.launchQueue.setConsumer(async (launchParams) => {
+          if (!launchParams.files || !launchParams.files.length) return;
+          const fileHandle = launchParams.files[0];
+          const file = await fileHandle.getFile();
+          const text = await file.text();
+          importMarkdownText(text, file.name);
+        });
+      }
+    }
+
+    // Registrar Service Worker
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
+      });
+    }
+
+    selectDeck(activeDeckId);
+    checkExternalInputs();
+  </script>
+</body>
+</html>
