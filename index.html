@@ -39,6 +39,8 @@
       --btn-fx-dur: 0.55s;
       --topbar-fx-dur: 0.6s;
       --topbar-fx-int: 0.85;
+      --card-slide-dur: 0.32s;
+      --card-fade-dur: 0.26s;
       transition: --accent var(--btn-fx-dur) ease, --accent-2 var(--btn-fx-dur) ease;
     }
 
@@ -230,7 +232,7 @@
       width: 100%;
       height: 100%;
       position: relative;
-      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.26s ease;
+      transition: transform var(--card-slide-dur) cubic-bezier(0.22, 1, 0.36, 1), opacity var(--card-fade-dur) ease;
     }
 
     .card-wrapper.slide-out {
@@ -253,6 +255,32 @@
       transform: translateX(-108%) rotate(-4deg) scale(0.95);
       opacity: 0;
       transition: none !important;
+    }
+
+    .card-wrapper.slide-out-up {
+      transform: translateY(-108%) scale(0.96);
+      opacity: 0;
+    }
+
+    .card-wrapper.slide-in-prep-down {
+      transform: translateY(108%) scale(0.96);
+      opacity: 0;
+      transition: none !important;
+    }
+
+    .card-wrapper.slide-out-down {
+      transform: translateY(108%) scale(0.96);
+      opacity: 0;
+    }
+
+    .card-wrapper.slide-in-prep-up {
+      transform: translateY(-108%) scale(0.96);
+      opacity: 0;
+      transition: none !important;
+    }
+
+    body.vertical-mode .controls {
+      display: none;
     }
 
     .card {
@@ -926,6 +954,20 @@
       <span>Invertir caras (Concepto → Definición)</span>
       <div class="switch" id="invertSwitch"></div>
     </div>
+
+    <div class="seg-group" id="verticalFxSection">
+      <div class="seg-head" id="verticalRow">
+        <span class="seg-label">Modo vertical sin botón (deslizar ↑/↓)</span>
+        <div class="switch" id="verticalSwitch"></div>
+      </div>
+      <div class="slider-group seg-speed">
+        <div class="slider-label">
+          <span>Velocidad de paso</span>
+          <span id="slideSpeedVal">100% (Actual)</span>
+        </div>
+        <input type="range" id="slideSpeedSlider" min="50" max="200" step="10" value="100" />
+      </div>
+    </div>
   </section>
 
   <!-- Drawer Mazos (.md) -->
@@ -997,6 +1039,8 @@
     let toastTimer = null;
     let isTransitioning = false;
     let isInverted = localStorage.getItem("flashcards_inverted") === "1";
+    let isVerticalMode = localStorage.getItem("flashcards_vertical_mode") === "1";
+    let slideSpeed = Number(localStorage.getItem("flashcards_slide_speed") || 100);
 
     const card = document.getElementById("card");
     const cardWrapper = document.getElementById("cardWrapper");
@@ -1130,6 +1174,9 @@
       document.documentElement.style.setProperty("--btn-fx-dur", btnSec);
       document.documentElement.style.setProperty("--topbar-fx-dur", topSec);
       document.documentElement.style.setProperty("--topbar-fx-int", (topbarIntensity / 100).toFixed(2));
+      const slideFactor = isVerticalMode ? (100 / slideSpeed) : 1;
+      document.documentElement.style.setProperty("--card-slide-dur", (0.32 * slideFactor).toFixed(2) + "s");
+      document.documentElement.style.setProperty("--card-fade-dur", (0.26 * slideFactor).toFixed(2) + "s");
     }
 
     function applyPalette(palette) {
@@ -1231,10 +1278,18 @@
       if (isTransitioning) return;
       isTransitioning = true;
 
-      const outClass = direction === "next" ? "slide-out" : "slide-out-right";
-      const prepClass = direction === "next" ? "slide-in-prep" : "slide-in-prep-left";
+      const outClass = isVerticalMode
+        ? (direction === "next" ? "slide-out-up" : "slide-out-down")
+        : (direction === "next" ? "slide-out" : "slide-out-right");
+      const prepClass = isVerticalMode
+        ? (direction === "next" ? "slide-in-prep-down" : "slide-in-prep-up")
+        : (direction === "next" ? "slide-in-prep" : "slide-in-prep-left");
 
       cardWrapper.classList.add(outClass);
+
+      const slideFactor = isVerticalMode ? (100 / slideSpeed) : 1;
+      const outMs = Math.round(240 * slideFactor);
+      const unlockMs = Math.round(300 * slideFactor);
 
       setTimeout(() => {
         card.style.transition = "none";
@@ -1249,10 +1304,10 @@
           requestAnimationFrame(() => {
             card.style.transition = "";
             cardWrapper.classList.remove(prepClass);
-            setTimeout(() => { isTransitioning = false; }, 300);
+            setTimeout(() => { isTransitioning = false; }, unlockMs);
           });
         });
-      }, 240);
+      }, outMs);
     }
 
     function goNext() { transitionCard("next", loadNextItem); }
@@ -1272,19 +1327,44 @@
 
     nextBtn.addEventListener("click", goNext);
 
-    // Swipe direccional
+    // Swipe direccional (horizontal siempre; vertical ↑/↓ en modo sin botón)
     let touchStartX = 0;
     let touchStartY = 0;
+    let touchStartScrollTop = 0;
+    let touchStartAtTop = true;
+    let touchStartAtBottom = true;
     const stage = document.getElementById("stage");
+
+    function getActiveFaceBody() {
+      const activeFace = card.classList.contains("is-flipped") ? backFace : frontFace;
+      return activeFace.querySelector(".face-body");
+    }
 
     stage.addEventListener("touchstart", (e) => {
       touchStartX = e.changedTouches[0].clientX;
       touchStartY = e.changedTouches[0].clientY;
+      const bodyEl = getActiveFaceBody();
+      if (bodyEl && bodyEl.scrollHeight > bodyEl.clientHeight + 4) {
+        touchStartScrollTop = bodyEl.scrollTop;
+        touchStartAtTop = bodyEl.scrollTop <= 6;
+        touchStartAtBottom = bodyEl.scrollTop + bodyEl.clientHeight >= bodyEl.scrollHeight - 6;
+      } else {
+        touchStartScrollTop = 0;
+        touchStartAtTop = true;
+        touchStartAtBottom = true;
+      }
     }, { passive: true });
 
     stage.addEventListener("touchend", (e) => {
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
+      if (isVerticalMode) {
+        if (Math.abs(dy) > 55 && Math.abs(dy) > Math.abs(dx) * 1.3) {
+          if (dy < 0 && touchStartAtBottom) goNext();
+          else if (dy > 0 && touchStartAtTop) goPrev();
+        }
+        return;
+      }
       if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
         if (dx < 0) goNext();
         else goPrev();
@@ -1364,6 +1444,31 @@
       invertSwitch.classList.toggle("on", isInverted);
       localStorage.setItem("flashcards_inverted", isInverted ? "1" : "0");
       if (history[historyIndex]) renderEntry(history[historyIndex], historyIndex + 1);
+    });
+
+    const verticalFxSection = document.getElementById("verticalFxSection");
+    const verticalSwitch = document.getElementById("verticalSwitch");
+    const slideSpeedSlider = document.getElementById("slideSpeedSlider");
+    const slideSpeedVal = document.getElementById("slideSpeedVal");
+
+    function syncVerticalMode() {
+      verticalSwitch.classList.toggle("on", isVerticalMode);
+      verticalFxSection.classList.toggle("is-disabled", !isVerticalMode);
+      document.body.classList.toggle("vertical-mode", isVerticalMode);
+      slideSpeedSlider.value = slideSpeed;
+      slideSpeedVal.textContent = slideSpeed === 100 ? "100% (Actual)" : `${slideSpeed}%`;
+      applyFxDurations();
+    }
+    syncVerticalMode();
+    document.getElementById("verticalRow").addEventListener("click", () => {
+      isVerticalMode = !isVerticalMode;
+      localStorage.setItem("flashcards_vertical_mode", isVerticalMode ? "1" : "0");
+      syncVerticalMode();
+    });
+    slideSpeedSlider.addEventListener("input", (e) => {
+      slideSpeed = Number(e.target.value);
+      localStorage.setItem("flashcards_slide_speed", slideSpeed);
+      syncVerticalMode();
     });
 
     function initSegGroup(groupId, storageKey, currentVal, onChange) {
