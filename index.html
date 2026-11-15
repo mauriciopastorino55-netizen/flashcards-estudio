@@ -119,6 +119,17 @@
       transition: none !important;
     }
 
+    .home-view.slide-out-right {
+      transform: translateX(105%);
+      opacity: 0;
+    }
+
+    .home-view.slide-in-prep-right {
+      transform: translateX(105%);
+      opacity: 0;
+      transition: none !important;
+    }
+
     .home-header {
       display: flex;
       align-items: center;
@@ -1270,6 +1281,7 @@
     let folders = loadFolders();
     let decks = loadDecks();
     let currentFolderId = null;
+    let lastFolderId = null;
     let activeDeckId = localStorage.getItem(STORAGE_ACTIVE_KEY) || "";
     if (decks.length > 0 && !decks.find(d => d.id === activeDeckId)) activeDeckId = decks[0].id;
     if (decks.length === 0) activeDeckId = "";
@@ -1884,18 +1896,56 @@
       homeTouchStartY = e.changedTouches[0].clientY;
     }, { passive: true });
 
+    function animateFolderChange(direction, updateFolderFn) {
+      isTransitioning = true;
+      const outCls = direction === "back" ? "slide-out-right" : "slide-out-left";
+      const prepCls = direction === "back" ? "slide-in-prep-left" : "slide-in-prep-right";
+      homeView.classList.add(outCls);
+      setTimeout(() => {
+        updateFolderFn();
+        homeView.classList.remove(outCls);
+        homeView.classList.add(prepCls);
+        renderDeckList();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            homeView.classList.remove(prepCls);
+            setTimeout(() => { isTransitioning = false; }, 170);
+          });
+        });
+      }, 160);
+    }
+
     homeView.addEventListener("touchend", (e) => {
-      if (isTransitioning || settingsDrawer.classList.contains("open") || modalBackdrop.classList.contains("open") || !items.length) return;
+      if (isTransitioning || settingsDrawer.classList.contains("open") || modalBackdrop.classList.contains("open")) return;
       const dx = e.changedTouches[0].clientX - homeTouchStartX;
       const dy = e.changedTouches[0].clientY - homeTouchStartY;
-      if (dx < -55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-        isTransitioning = true;
-        homeView.classList.add("slide-out-left");
-        setTimeout(() => {
-          showStudyView(true);
-          homeView.classList.remove("slide-out-left");
-          isTransitioning = false;
-        }, 170);
+      if (Math.abs(dx) <= 55 || Math.abs(dx) <= Math.abs(dy) * 1.4) return;
+
+      if (dx > 0 && currentFolderId) {
+        animateFolderChange("back", () => {
+          lastFolderId = currentFolderId;
+          const cur = folders.find(f => f.id === currentFolderId);
+          currentFolderId = cur ? (cur.parentId || null) : null;
+        });
+        return;
+      }
+
+      if (dx < 0) {
+        if (!currentFolderId && lastFolderId && folders.some(f => f.id === lastFolderId)) {
+          animateFolderChange("forward", () => {
+            currentFolderId = lastFolderId;
+          });
+          return;
+        }
+        if (items.length) {
+          isTransitioning = true;
+          homeView.classList.add("slide-out-left");
+          setTimeout(() => {
+            showStudyView(true);
+            homeView.classList.remove("slide-out-left");
+            isTransitioning = false;
+          }, 170);
+        }
       }
     }, { passive: true });
 
@@ -2234,6 +2284,7 @@
     const folderBreadcrumb = document.getElementById("folderBreadcrumb");
 
     folderBackBtn.addEventListener("click", () => {
+      if (currentFolderId) lastFolderId = currentFolderId;
       const cur = folders.find(f => f.id === currentFolderId);
       currentFolderId = cur ? (cur.parentId || null) : null;
       renderDeckList();
@@ -2388,6 +2439,7 @@
         row.append(nameEl, arrow);
         row.addEventListener("click", () => {
           currentFolderId = folder.id;
+          lastFolderId = folder.id;
           renderDeckList();
         });
         list.appendChild(row);
