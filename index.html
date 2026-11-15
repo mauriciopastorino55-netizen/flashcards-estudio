@@ -23,6 +23,12 @@
       initial-value: #22d3ee;
     }
 
+    @property --edge-angle {
+      syntax: "<angle>";
+      inherits: false;
+      initial-value: 0deg;
+    }
+
     :root {
       --bg: #090b10;
       --surface: #121622;
@@ -31,17 +37,23 @@
       --muted: #8b95b0;
       --accent: #7c5cff;
       --accent-2: #22d3ee;
-      --prev-accent: #7c5cff;
-      --prev-accent-2: #22d3ee;
       --front-size: 20px;
       --back-size: 28px;
       --author-size: 16px;
-      --btn-fx-dur: 0.55s;
-      --topbar-fx-dur: 0.6s;
-      --topbar-fx-int: 0.85;
+      --card-fx-dur: 0.72s;
+      --card-fx-int: 0.85;
+      --card-fx-pct: 55%;
+      --glow-p1: 18%;
+      --glow-p2: 9%;
+      --glow-inset: 8%;
+      --glow-shadow: 18%;
+      --glow-p1-c: 22%;
+      --glow-p2-c: 10%;
+      --glow-inset-c: 10%;
+      --glow-shadow-c: 22%;
       --card-slide-dur: 0.32s;
       --card-fade-dur: 0.26s;
-      transition: --accent var(--btn-fx-dur) ease, --accent-2 var(--btn-fx-dur) ease;
+      transition: --accent 0.55s ease, --accent-2 0.55s ease;
     }
 
     * {
@@ -82,84 +94,55 @@
       gap: 12px;
     }
 
-    /* Header */
-    .topbar {
-      position: relative;
+    /* Vistas Inicio y Estudio */
+    .view-hidden {
+      display: none !important;
+    }
+
+    .home-view {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      gap: 16px;
+      transition: transform var(--card-slide-dur) cubic-bezier(0.22, 1, 0.36, 1), opacity var(--card-fade-dur) ease;
+    }
+
+    .home-view.slide-out-left {
+      transform: translateX(-105%);
+      opacity: 0;
+    }
+
+    .home-view.slide-in-prep-left {
+      transform: translateX(-105%);
+      opacity: 0;
+      transition: none !important;
+    }
+
+    .home-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 10px;
       flex-shrink: 0;
-      overflow: hidden;
-      border-radius: 12px;
-      padding: 4px 2px 6px;
     }
 
-    .topbar::after {
-      content: "";
-      position: absolute;
-      top: -20%;
-      bottom: -20%;
-      left: 0;
-      width: 64px;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        color-mix(in srgb, var(--accent-2) 18%, transparent) 30%,
-        rgba(255, 255, 255, 0.52) 50%,
-        color-mix(in srgb, var(--accent-2) 18%, transparent) 70%,
-        transparent 100%
-      );
-      transform: translateX(-120px) skewX(-24deg);
-      pointer-events: none;
-      opacity: 0;
-      filter: blur(0.4px);
+    .home-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      background: linear-gradient(135deg, #ffffff 25%, var(--accent-2) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
 
-    .topbar::before {
-      content: "";
-      position: absolute;
-      left: 0;
-      bottom: 0;
-      width: 96px;
-      height: 1.5px;
-      border-radius: 999px;
-      background: linear-gradient(
-        90deg,
-        transparent 0%,
-        color-mix(in srgb, var(--accent-2) 60%, transparent) 35%,
-        rgba(255, 255, 255, 0.9) 55%,
-        color-mix(in srgb, var(--accent-2) 70%, transparent) 75%,
-        transparent 100%
-      );
-      box-shadow: 0 0 8px color-mix(in srgb, var(--accent-2) 75%, transparent);
-      transform: translateX(-110px);
-      pointer-events: none;
-      opacity: 0;
-    }
-
-    .topbar.flash-glint::after,
-    .topbar.flash-glint-spark::after {
-      animation: topbarGlint var(--topbar-fx-dur) cubic-bezier(0.25, 0.85, 0.35, 1) forwards;
-    }
-
-    .topbar.flash-spark::before,
-    .topbar.flash-glint-spark::before {
-      animation: topbarSpark var(--topbar-fx-dur) cubic-bezier(0.25, 0.85, 0.35, 1) forwards;
-    }
-
-    @keyframes topbarGlint {
-      0% { transform: translateX(-90px) skewX(-24deg); opacity: 0; }
-      18% { opacity: var(--topbar-fx-int); }
-      82% { opacity: calc(var(--topbar-fx-int) * 0.92); }
-      100% { transform: translateX(calc(100vw + 40px)) skewX(-24deg); opacity: 0; }
-    }
-
-    @keyframes topbarSpark {
-      0% { transform: translateX(-100px); opacity: 0; }
-      15% { opacity: var(--topbar-fx-int); }
-      85% { opacity: calc(var(--topbar-fx-int) * 0.95); }
-      100% { transform: translateX(calc(100vw + 20px)); opacity: 0; }
+    .study-view {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      gap: 12px;
     }
 
     .brand {
@@ -235,24 +218,13 @@
       transition: transform var(--card-slide-dur) cubic-bezier(0.22, 1, 0.36, 1), opacity var(--card-fade-dur) ease;
     }
 
-    .card-wrapper.slide-out {
-      transform: translateX(-108%) rotate(-4deg) scale(0.95);
-      opacity: 0;
-    }
-
-    .card-wrapper.slide-in-prep {
-      transform: translateX(108%) rotate(4deg) scale(0.95);
-      opacity: 0;
-      transition: none !important;
-    }
-
     .card-wrapper.slide-out-right {
-      transform: translateX(108%) rotate(4deg) scale(0.95);
+      transform: translateX(105%);
       opacity: 0;
     }
 
-    .card-wrapper.slide-in-prep-left {
-      transform: translateX(-108%) rotate(-4deg) scale(0.95);
+    .card-wrapper.slide-in-prep-right {
+      transform: translateX(105%);
       opacity: 0;
       transition: none !important;
     }
@@ -279,10 +251,6 @@
       transition: none !important;
     }
 
-    body.vertical-mode .controls {
-      display: none;
-    }
-
     .card {
       width: 100%;
       height: 100%;
@@ -306,11 +274,16 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      background: linear-gradient(155deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%), var(--surface);
+      background:
+        linear-gradient(90deg, var(--accent) 0%, var(--accent-2) 100%) left bottom / 100% 3px no-repeat,
+        radial-gradient(95% 26% at 50% 100%, color-mix(in srgb, var(--accent) var(--glow-p1), transparent), color-mix(in srgb, var(--accent-2) var(--glow-p2), transparent) 48%, transparent 78%),
+        linear-gradient(155deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.015) 100%),
+        var(--surface);
       border: 1px solid color-mix(in srgb, var(--accent) 42%, rgba(255,255,255,0.08));
       box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.55),
-        0 0 36px color-mix(in srgb, var(--accent) 16%, transparent),
+        0 10px 30px color-mix(in srgb, var(--accent) var(--glow-shadow), transparent),
+        inset 0 -8px 20px color-mix(in srgb, var(--accent-2) var(--glow-inset), transparent),
         inset 0 1px 0 rgba(255, 255, 255, 0.12);
       overflow: hidden;
     }
@@ -327,6 +300,34 @@
       pointer-events: none;
     }
 
+    .face::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 2px;
+      background: conic-gradient(
+        from var(--edge-angle),
+        transparent 0deg,
+        transparent 205deg,
+        color-mix(in srgb, var(--accent) 90%, transparent) 265deg,
+        var(--accent-2) 320deg,
+        rgba(255, 255, 255, 0.92) 346deg,
+        transparent 360deg
+      );
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      mask-composite: exclude;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
     .face-back {
       transform: rotateY(180deg);
     }
@@ -337,20 +338,33 @@
     }
 
     .face.is-concept-face {
-      background: linear-gradient(155deg, color-mix(in srgb, var(--accent) 16%, var(--surface-2)) 0%, var(--surface) 100%);
+      background:
+        linear-gradient(90deg, var(--accent-2) 0%, var(--accent) 100%) left bottom / 100% 3px no-repeat,
+        radial-gradient(95% 28% at 50% 100%, color-mix(in srgb, var(--accent-2) var(--glow-p1-c), transparent), color-mix(in srgb, var(--accent) var(--glow-p2-c), transparent) 48%, transparent 78%),
+        linear-gradient(155deg, color-mix(in srgb, var(--accent) 16%, var(--surface-2)) 0%, var(--surface) 100%);
       border-color: color-mix(in srgb, var(--accent-2) 50%, rgba(255,255,255,0.1));
       box-shadow:
         0 20px 50px rgba(0, 0, 0, 0.6),
-        0 0 42px color-mix(in srgb, var(--accent-2) 20%, transparent),
+        0 10px 34px color-mix(in srgb, var(--accent-2) var(--glow-shadow-c), transparent),
+        inset 0 -10px 22px color-mix(in srgb, var(--accent-2) var(--glow-inset-c), transparent),
         inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .face.is-concept-face .face-body {
+      padding: 8px 2px 32px;
     }
 
     .face-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       flex-shrink: 0;
-      z-index: 1;
+      z-index: 2;
+    }
+
+    .face.is-concept-face .counter-badge {
+      display: none;
     }
 
     .badge {
@@ -451,14 +465,52 @@
       transform: translate(-50%, 0) scale(1);
     }
 
+    @keyframes borderSweep {
+      0% { --edge-angle: -30deg; opacity: 0; }
+      14% { opacity: var(--card-fx-int); }
+      80% { opacity: calc(var(--card-fx-int) * 0.9); }
+      100% { --edge-angle: 330deg; opacity: 0; }
+    }
+
+    @keyframes cardPulseStep {
+      0% {
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.55),
+          0 10px 30px color-mix(in srgb, var(--accent) 20%, transparent),
+          0 0 0 0 color-mix(in srgb, var(--accent-2) var(--card-fx-pct), transparent);
+      }
+      75% {
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.55),
+          0 10px 30px color-mix(in srgb, var(--accent) 18%, transparent),
+          0 0 0 15px rgba(34, 211, 238, 0);
+      }
+      100% {
+        box-shadow:
+          0 20px 50px rgba(0, 0, 0, 0.55),
+          0 10px 30px color-mix(in srgb, var(--accent) 18%, transparent),
+          0 0 0 16px rgba(34, 211, 238, 0);
+      }
+    }
+
+    .card-wrapper.fx-edge .face::after,
+    .card-wrapper.fx-edge-pulse .face::after {
+      animation: borderSweep var(--card-fx-dur) cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    .card-wrapper.fx-pulse .face,
+    .card-wrapper.fx-edge-pulse .face {
+      animation: cardPulseStep var(--card-fx-dur) ease-out;
+    }
+
     @keyframes pulseCelebrate {
-      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 60%, transparent); }
-      70% { box-shadow: 0 0 0 22px rgba(34, 211, 238, 0); }
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) 65%, transparent); }
+      70% { box-shadow: 0 0 0 24px rgba(34, 211, 238, 0); }
       100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
     }
 
     .card-wrapper.celebrate .face {
-      animation: pulseCelebrate 0.75s ease-out;
+      animation: pulseCelebrate 0.8s ease-out;
     }
 
     .author-pill {
@@ -488,83 +540,6 @@
       color: var(--muted);
       letter-spacing: 0.4px;
       text-align: center;
-    }
-
-    /* Botón inferior */
-    .controls {
-      display: flex;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .btn-next {
-      position: relative;
-      overflow: hidden;
-      flex: 1;
-      border: none;
-      border-radius: 18px;
-      padding: 16px 20px;
-      font-size: 16px;
-      font-weight: 700;
-      color: #ffffff;
-      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
-      box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 35%, transparent);
-      cursor: pointer;
-      transition: transform 0.15s ease, filter 0.2s ease, box-shadow var(--btn-fx-dur) ease;
-    }
-
-    .btn-next .btn-label {
-      position: relative;
-      z-index: 2;
-    }
-
-    .btn-next::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, var(--prev-accent) 0%, var(--prev-accent-2) 100%);
-      opacity: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .btn-next::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        110deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.34) 50%,
-        transparent 100%
-      );
-      transform: translateX(-120%);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .btn-next.fx-wipe::before {
-      opacity: 1;
-      animation: btnWipe var(--btn-fx-dur) cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    .btn-next.fx-pulse::after {
-      animation: btnPulseSweep var(--btn-fx-dur) cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    }
-
-    @keyframes btnWipe {
-      0% { clip-path: inset(0 0 0 0); opacity: 1; }
-      100% { clip-path: inset(0 0 0 100%); opacity: 1; }
-    }
-
-    @keyframes btnPulseSweep {
-      0% { transform: translateX(-120%); opacity: 0.9; }
-      100% { transform: translateX(120%); opacity: 0; }
-    }
-
-    .btn-next:active {
-      transform: scale(0.97);
-      filter: brightness(1.1);
     }
 
     /* Segmented options inside settings */
@@ -818,57 +793,63 @@
   <div class="round-toast" id="roundToast"></div>
 
   <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <span class="counter-pill" id="counterPill">#1</span>
-        <span class="title-text" id="deckTitle">Apolonio</span>
-      </div>
-      <div class="top-actions">
-        <button class="btn-icon" id="openDecks" aria-label="Mazos">Mazos</button>
-        <button class="btn-icon" id="openSettings" aria-label="Ajustes" style="display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <!-- Pantalla de Inicio (Mazos) -->
+    <section class="home-view" id="homeView">
+      <header class="home-header">
+        <div class="home-title">Mazos</div>
+        <button class="btn-icon open-settings-trigger" id="openSettings" aria-label="Ajustes" style="display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="3"></circle>
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
           </svg>
         </button>
-      </div>
-    </header>
+      </header>
 
-    <main class="stage" id="stage">
-      <div class="card-wrapper" id="cardWrapper">
-        <div class="card" id="card">
-          <div class="face face-front" id="frontFace">
-            <div class="face-header">
-              <span class="badge" id="frontBadge">Definición</span>
-              <span class="num-tag" id="frontNum"></span>
-            </div>
-            <div class="face-body">
-              <div class="face-center-wrap">
-                <div class="style-def" id="frontText"></div>
-                <div class="author-pill" id="frontAuthorPill"></div>
+      <label class="btn-upload">
+        + Cargar archivo .md desde el celular
+        <input type="file" id="mdFileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden />
+      </label>
+
+      <div class="deck-list" id="deckList"></div>
+
+    </section>
+
+    <!-- Vista de Estudio (Tarjeta ampliada) -->
+    <section class="study-view view-hidden" id="studyView">
+      <main class="stage" id="stage">
+        <div class="card-wrapper" id="cardWrapper">
+          <div class="card" id="card">
+            <div class="face face-front is-def-face" id="frontFace">
+              <div class="face-header">
+                <span class="badge" id="frontBadge">Definición</span>
+                <span class="badge counter-badge" id="frontNum">1/19 · V1</span>
+              </div>
+              <div class="face-body">
+                <div class="face-center-wrap">
+                  <div class="style-def" id="frontText"></div>
+                  <div class="author-pill" id="frontAuthorPill"></div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="face face-back is-concept-face" id="backFace">
-            <div class="face-header">
-              <span class="badge" id="backBadge">Concepto</span>
-              <span class="num-tag" id="backNum"></span>
-            </div>
-            <div class="face-body">
-              <div class="face-center-wrap">
-                <div class="style-concept" id="backText"></div>
-                <div class="author-pill" id="backAuthorPill"></div>
+            <div class="face face-back is-concept-face" id="backFace">
+              <div class="face-header">
+                <span class="badge" id="backBadge">Concepto</span>
+                <span class="badge counter-badge" id="backNum">1/19 · V1</span>
+              </div>
+              <div class="face-body">
+                <div class="face-center-wrap">
+                  <div class="style-concept" id="backText"></div>
+                  <div class="author-pill" id="backAuthorPill"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </main>
+      </main>
 
-    <footer class="controls">
-      <button class="btn-next" id="nextBtn"><span class="btn-label">Siguiente tarjeta →</span></button>
-    </footer>
+
+    </section>
   </div>
 
   <!-- Backdrop -->
@@ -883,7 +864,7 @@
 
     <div class="slider-group">
       <div class="slider-label">
-        <span>Frente</span>
+        <span>Tamaño de definición</span>
         <span id="frontSizeVal">20 px</span>
       </div>
       <input type="range" id="frontSlider" min="14" max="34" step="1" value="20" />
@@ -891,7 +872,7 @@
 
     <div class="slider-group">
       <div class="slider-label">
-        <span>Reverso</span>
+        <span>Tamaño de concepto</span>
         <span id="backSizeVal">28 px</span>
       </div>
       <input type="range" id="backSlider" min="18" max="46" step="1" value="28" />
@@ -899,54 +880,35 @@
 
     <div class="slider-group">
       <div class="slider-label">
-        <span>Etiqueta (Autores)</span>
+        <span>Tamaño de etiqueta (autores)</span>
         <span id="authorSizeVal">16 px</span>
       </div>
       <input type="range" id="authorSlider" min="12" max="26" step="1" value="16" />
     </div>
 
-    <div class="seg-group" id="btnFxSection">
-      <div class="seg-head" id="btnFxToggleRow">
-        <span class="seg-label">Transición del botón</span>
-        <div class="switch" id="btnFxSwitch"></div>
+    <div class="seg-group" id="cardFxSection">
+      <div class="seg-head" id="cardFxToggleRow">
+        <span class="seg-label">Efecto al cambiar tarjeta</span>
+        <div class="switch" id="cardFxSwitch"></div>
       </div>
-      <div class="seg-options" id="btnFxGroup">
-        <button type="button" class="seg-btn" data-fx="fade">Fundido</button>
-        <button type="button" class="seg-btn" data-fx="wipe">Barrido</button>
-        <button type="button" class="seg-btn" data-fx="pulse">Fundido + pulso</button>
-      </div>
-      <div class="slider-group seg-speed">
-        <div class="slider-label">
-          <span>Velocidad</span>
-          <span id="btnSpeedVal">100% (Máx)</span>
-        </div>
-        <input type="range" id="btnSpeedSlider" min="25" max="100" step="5" value="100" />
-      </div>
-    </div>
-
-    <div class="seg-group" id="topbarFxSection">
-      <div class="seg-head" id="topbarFxToggleRow">
-        <span class="seg-label">Destello en barra superior</span>
-        <div class="switch" id="topbarFxSwitch"></div>
-      </div>
-      <div class="seg-options" id="topbarFxGroup">
-        <button type="button" class="seg-btn" data-fx="glint">Destello fino</button>
-        <button type="button" class="seg-btn" data-fx="spark">Chispa en borde</button>
-        <button type="button" class="seg-btn" data-fx="glint-spark">Destello + filo</button>
+      <div class="seg-options" id="cardFxGroup">
+        <button type="button" class="seg-btn" data-fx="edge">Recorrido borde</button>
+        <button type="button" class="seg-btn" data-fx="pulse">Pulso suave</button>
+        <button type="button" class="seg-btn" data-fx="edge-pulse">Borde + pulso</button>
       </div>
       <div class="slider-group seg-speed">
         <div class="slider-label">
           <span>Velocidad</span>
-          <span id="topbarSpeedVal">100% (Máx)</span>
+          <span id="cardFxSpeedVal">100% (Máx)</span>
         </div>
-        <input type="range" id="topbarSpeedSlider" min="25" max="100" step="5" value="100" />
+        <input type="range" id="cardFxSpeedSlider" min="25" max="100" step="5" value="100" />
       </div>
       <div class="slider-group seg-speed">
         <div class="slider-label">
           <span>Intensidad</span>
-          <span id="topbarIntVal">85%</span>
+          <span id="cardFxIntVal">85%</span>
         </div>
-        <input type="range" id="topbarIntSlider" min="15" max="100" step="5" value="85" />
+        <input type="range" id="cardFxIntSlider" min="15" max="100" step="5" value="85" />
       </div>
     </div>
 
@@ -955,39 +917,24 @@
       <div class="switch" id="invertSwitch"></div>
     </div>
 
-    <div class="seg-group" id="verticalFxSection">
-      <div class="seg-head" id="verticalRow">
-        <span class="seg-label">Modo vertical sin botón (deslizar ↑/↓)</span>
-        <div class="switch" id="verticalSwitch"></div>
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Velocidad de paso (↑/↓)</span>
+        <span id="slideSpeedVal">100% (Actual)</span>
       </div>
-      <div class="slider-group seg-speed">
-        <div class="slider-label">
-          <span>Velocidad de paso</span>
-          <span id="slideSpeedVal">100% (Actual)</span>
-        </div>
-        <input type="range" id="slideSpeedSlider" min="50" max="200" step="10" value="100" />
+      <input type="range" id="slideSpeedSlider" min="50" max="200" step="10" value="100" />
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Resplandor inferior</span>
+        <span id="bottomGlowVal">100% (Actual)</span>
       </div>
+      <input type="range" id="bottomGlowSlider" min="0" max="200" step="10" value="100" />
     </div>
   </section>
 
-  <!-- Drawer Mazos (.md) -->
-  <section class="drawer" id="decksDrawer" aria-hidden="true">
-    <div class="drawer-head">
-      <div class="drawer-title">Mazos (.md)</div>
-      <button class="btn-icon" id="closeDecks">Listo</button>
-    </div>
 
-    <label class="btn-upload">
-      + Cargar archivo .md desde el celular
-      <input type="file" id="mdFileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden />
-    </label>
-
-    <div class="deck-list" id="deckList"></div>
-
-    <div class="hint-md">
-      Formato compatible: encabezados <code>### Título</code> (o <code>## Título</code>) con la definición debajo. Si agregás <code>Autores: ...</code> al final de un bloque, aparece destacado en el reverso.
-    </div>
-  </section>
 
   <script>
     const DEFAULT_ITEMS = [
@@ -1039,7 +986,6 @@
     let toastTimer = null;
     let isTransitioning = false;
     let isInverted = localStorage.getItem("flashcards_inverted") === "1";
-    let isVerticalMode = localStorage.getItem("flashcards_vertical_mode") === "1";
     let slideSpeed = Number(localStorage.getItem("flashcards_slide_speed") || 100);
 
     const card = document.getElementById("card");
@@ -1054,9 +1000,37 @@
     const backAuthorPill = document.getElementById("backAuthorPill");
     const frontNum = document.getElementById("frontNum");
     const backNum = document.getElementById("backNum");
-    const counterPill = document.getElementById("counterPill");
-    const deckTitle = document.getElementById("deckTitle");
-    const nextBtn = document.getElementById("nextBtn");
+    const homeView = document.getElementById("homeView");
+    const studyView = document.getElementById("studyView");
+
+    function showHomeView(fromSwipe = false) {
+      renderDeckList();
+      homeView.classList.remove("slide-out-left");
+      if (fromSwipe) homeView.classList.add("slide-in-prep-left");
+      studyView.classList.add("view-hidden");
+      homeView.classList.remove("view-hidden");
+      if (fromSwipe) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            homeView.classList.remove("slide-in-prep-left");
+          });
+        });
+      }
+    }
+
+    function showStudyView(fromSwipe = false) {
+      cardWrapper.classList.remove("slide-out-right");
+      if (fromSwipe) cardWrapper.classList.add("slide-in-prep-right");
+      homeView.classList.add("view-hidden");
+      studyView.classList.remove("view-hidden");
+      if (fromSwipe) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            cardWrapper.classList.remove("slide-in-prep-right");
+          });
+        });
+      }
+    }
 
     function loadDecks() {
       try {
@@ -1131,7 +1105,6 @@
       items = deck.items;
       activeFrontLabel = deck.frontLabel || "Definición";
       activeBackLabel = deck.backLabel || "Concepto";
-      deckTitle.textContent = deck.name;
       bag = [];
       lastId = null;
       history = [];
@@ -1155,52 +1128,37 @@
       }
     }
 
-    let btnFx = localStorage.getItem("flashcards_btn_fx") || "fade";
-    let btnFxEnabled = localStorage.getItem("flashcards_btn_fx_on") !== "0";
-    let btnSpeed = Number(localStorage.getItem("flashcards_btn_speed") || 100);
-
-    let topbarFx = localStorage.getItem("flashcards_topbar_fx") || "glint";
-    if (!["glint", "spark", "glint-spark"].includes(topbarFx)) topbarFx = "glint";
-    let topbarFxEnabled = localStorage.getItem("flashcards_topbar_fx_on") !== "0";
-    let topbarSpeed = Number(localStorage.getItem("flashcards_topbar_speed") || 100);
-    let topbarIntensity = Number(localStorage.getItem("flashcards_topbar_int") || 85);
+    let cardFx = localStorage.getItem("flashcards_card_fx") || "edge";
+    if (!["edge", "pulse", "edge-pulse"].includes(cardFx)) cardFx = "edge";
+    let cardFxEnabled = localStorage.getItem("flashcards_card_fx_on") !== "0";
+    let cardFxSpeed = Number(localStorage.getItem("flashcards_card_fx_speed") || 100);
+    let cardFxIntensity = Number(localStorage.getItem("flashcards_card_fx_int") || 85);
 
     let currentPalette = PALETTES[0];
-    const topbarEl = document.querySelector(".topbar");
 
     function applyFxDurations() {
-      const btnSec = btnFxEnabled ? (0.55 * (100 / btnSpeed)).toFixed(2) + "s" : "0s";
-      const topSec = (0.60 * (100 / topbarSpeed)).toFixed(2) + "s";
-      document.documentElement.style.setProperty("--btn-fx-dur", btnSec);
-      document.documentElement.style.setProperty("--topbar-fx-dur", topSec);
-      document.documentElement.style.setProperty("--topbar-fx-int", (topbarIntensity / 100).toFixed(2));
-      const slideFactor = isVerticalMode ? (100 / slideSpeed) : 1;
+      const fxSec = (0.72 * (100 / cardFxSpeed)).toFixed(2) + "s";
+      document.documentElement.style.setProperty("--card-fx-dur", fxSec);
+      document.documentElement.style.setProperty("--card-fx-int", (cardFxIntensity / 100).toFixed(2));
+      document.documentElement.style.setProperty("--card-fx-pct", Math.round(58 * cardFxIntensity / 100) + "%");
+      const slideFactor = 100 / slideSpeed;
       document.documentElement.style.setProperty("--card-slide-dur", (0.32 * slideFactor).toFixed(2) + "s");
       document.documentElement.style.setProperty("--card-fade-dur", (0.26 * slideFactor).toFixed(2) + "s");
     }
 
     function applyPalette(palette) {
-      document.documentElement.style.setProperty("--prev-accent", currentPalette[0]);
-      document.documentElement.style.setProperty("--prev-accent-2", currentPalette[1]);
       currentPalette = palette;
       document.documentElement.style.setProperty("--accent", palette[0]);
       document.documentElement.style.setProperty("--accent-2", palette[1]);
     }
 
     function triggerCardChangeFx() {
-      nextBtn.classList.remove("fx-wipe", "fx-pulse");
-      void nextBtn.offsetWidth;
-      if (btnFxEnabled) {
-        if (btnFx === "wipe") nextBtn.classList.add("fx-wipe");
-        else if (btnFx === "pulse") nextBtn.classList.add("fx-pulse");
-      }
-
-      topbarEl.classList.remove("flash-glint", "flash-spark", "flash-glint-spark");
-      void topbarEl.offsetWidth;
-      if (topbarFxEnabled) {
-        if (topbarFx === "glint") topbarEl.classList.add("flash-glint");
-        else if (topbarFx === "spark") topbarEl.classList.add("flash-spark");
-        else if (topbarFx === "glint-spark") topbarEl.classList.add("flash-glint-spark");
+      cardWrapper.classList.remove("fx-edge", "fx-pulse", "fx-edge-pulse");
+      void cardWrapper.offsetWidth;
+      if (cardFxEnabled) {
+        if (cardFx === "edge") cardWrapper.classList.add("fx-edge");
+        else if (cardFx === "pulse") cardWrapper.classList.add("fx-pulse");
+        else if (cardFx === "edge-pulse") cardWrapper.classList.add("fx-edge-pulse");
       }
     }
 
@@ -1221,13 +1179,15 @@
     function renderEntry(entry, number) {
       const { item, palette, round } = entry;
       const posInRound = ((number - 1) % items.length) + 1;
-      counterPill.textContent = `${posInRound}/${items.length} · V${round + 1}`;
-      frontNum.textContent = "";
-      backNum.textContent = "";
+      const counterStr = `${posInRound}/${items.length} · V${round + 1}`;
+      frontNum.textContent = counterStr;
+      backNum.textContent = counterStr;
 
       if (isInverted) {
         frontFace.classList.add("is-concept-face");
+        frontFace.classList.remove("is-def-face");
         backFace.classList.remove("is-concept-face");
+        backFace.classList.add("is-def-face");
         frontBadge.textContent = activeBackLabel;
         backBadge.textContent = activeFrontLabel;
         frontText.className = "style-concept";
@@ -1238,7 +1198,9 @@
         backAuthorPill.textContent = "";
       } else {
         frontFace.classList.remove("is-concept-face");
+        frontFace.classList.add("is-def-face");
         backFace.classList.add("is-concept-face");
+        backFace.classList.remove("is-def-face");
         frontBadge.textContent = activeFrontLabel;
         backBadge.textContent = activeBackLabel;
         frontText.className = "style-def";
@@ -1278,16 +1240,12 @@
       if (isTransitioning) return;
       isTransitioning = true;
 
-      const outClass = isVerticalMode
-        ? (direction === "next" ? "slide-out-up" : "slide-out-down")
-        : (direction === "next" ? "slide-out" : "slide-out-right");
-      const prepClass = isVerticalMode
-        ? (direction === "next" ? "slide-in-prep-down" : "slide-in-prep-up")
-        : (direction === "next" ? "slide-in-prep" : "slide-in-prep-left");
+      const outClass = direction === "next" ? "slide-out-up" : "slide-out-down";
+      const prepClass = direction === "next" ? "slide-in-prep-down" : "slide-in-prep-up";
 
       cardWrapper.classList.add(outClass);
 
-      const slideFactor = isVerticalMode ? (100 / slideSpeed) : 1;
+      const slideFactor = 100 / slideSpeed;
       const outMs = Math.round(240 * slideFactor);
       const unlockMs = Math.round(300 * slideFactor);
 
@@ -1295,7 +1253,6 @@
         card.style.transition = "none";
         card.classList.remove("is-flipped");
         updateFn();
-        triggerCardChangeFx();
 
         cardWrapper.classList.remove(outClass);
         cardWrapper.classList.add(prepClass);
@@ -1304,6 +1261,7 @@
           requestAnimationFrame(() => {
             card.style.transition = "";
             cardWrapper.classList.remove(prepClass);
+            triggerCardChangeFx();
             setTimeout(() => { isTransitioning = false; }, unlockMs);
           });
         });
@@ -1325,9 +1283,7 @@
       card.classList.toggle("is-flipped");
     });
 
-    nextBtn.addEventListener("click", goNext);
-
-    // Swipe direccional (horizontal siempre; vertical ↑/↓ en modo sin botón)
+    // Swipe vertical (↑/↓ entre tarjetas) y derecho (→ volver a Inicio)
     let touchStartX = 0;
     let touchStartY = 0;
     let touchStartScrollTop = 0;
@@ -1356,31 +1312,54 @@
     }, { passive: true });
 
     stage.addEventListener("touchend", (e) => {
+      if (isTransitioning) return;
       const dx = e.changedTouches[0].clientX - touchStartX;
       const dy = e.changedTouches[0].clientY - touchStartY;
-      if (isVerticalMode) {
-        if (Math.abs(dy) > 55 && Math.abs(dy) > Math.abs(dx) * 1.3) {
-          if (dy < 0 && touchStartAtBottom) goNext();
-          else if (dy > 0 && touchStartAtTop) goPrev();
-        }
+      if (dx > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        isTransitioning = true;
+        cardWrapper.classList.add("slide-out-right");
+        setTimeout(() => {
+          showHomeView(true);
+          cardWrapper.classList.remove("slide-out-right");
+          isTransitioning = false;
+        }, 170);
         return;
       }
-      if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-        if (dx < 0) goNext();
-        else goPrev();
+      if (Math.abs(dy) > 55 && Math.abs(dy) > Math.abs(dx) * 1.3) {
+        if (dy < 0 && touchStartAtBottom) goNext();
+        else if (dy > 0 && touchStartAtTop) goPrev();
       }
     }, { passive: true });
 
-    // Drawers
+    let homeTouchStartX = 0;
+    let homeTouchStartY = 0;
+    homeView.addEventListener("touchstart", (e) => {
+      homeTouchStartX = e.changedTouches[0].clientX;
+      homeTouchStartY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    homeView.addEventListener("touchend", (e) => {
+      if (isTransitioning || settingsDrawer.classList.contains("open") || !items.length) return;
+      const dx = e.changedTouches[0].clientX - homeTouchStartX;
+      const dy = e.changedTouches[0].clientY - homeTouchStartY;
+      if (dx < -55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        isTransitioning = true;
+        homeView.classList.add("slide-out-left");
+        setTimeout(() => {
+          showStudyView(true);
+          homeView.classList.remove("slide-out-left");
+          isTransitioning = false;
+        }, 170);
+      }
+    }, { passive: true });
+
+    // Drawers y navegación Inicio <-> Estudio
     const backdrop = document.getElementById("backdrop");
     const settingsDrawer = document.getElementById("settingsDrawer");
-    const decksDrawer = document.getElementById("decksDrawer");
 
     function closeAllDrawers() {
-      [settingsDrawer, decksDrawer].forEach(d => {
-        d.classList.remove("open");
-        d.setAttribute("aria-hidden", "true");
-      });
+      settingsDrawer.classList.remove("open");
+      settingsDrawer.setAttribute("aria-hidden", "true");
       backdrop.classList.remove("open");
     }
 
@@ -1391,10 +1370,13 @@
       backdrop.classList.add("open");
     }
 
-    document.getElementById("openSettings").addEventListener("click", () => openDrawer(settingsDrawer));
+    document.querySelectorAll(".open-settings-trigger").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openDrawer(settingsDrawer);
+      });
+    });
     document.getElementById("closeSettings").addEventListener("click", closeAllDrawers);
-    document.getElementById("openDecks").addEventListener("click", () => { renderDeckList(); openDrawer(decksDrawer); });
-    document.getElementById("closeDecks").addEventListener("click", closeAllDrawers);
     backdrop.addEventListener("click", closeAllDrawers);
 
     // Tamaño de letra e invertir
@@ -1446,29 +1428,19 @@
       if (history[historyIndex]) renderEntry(history[historyIndex], historyIndex + 1);
     });
 
-    const verticalFxSection = document.getElementById("verticalFxSection");
-    const verticalSwitch = document.getElementById("verticalSwitch");
     const slideSpeedSlider = document.getElementById("slideSpeedSlider");
     const slideSpeedVal = document.getElementById("slideSpeedVal");
 
-    function syncVerticalMode() {
-      verticalSwitch.classList.toggle("on", isVerticalMode);
-      verticalFxSection.classList.toggle("is-disabled", !isVerticalMode);
-      document.body.classList.toggle("vertical-mode", isVerticalMode);
+    function syncSlideSpeed() {
       slideSpeedSlider.value = slideSpeed;
       slideSpeedVal.textContent = slideSpeed === 100 ? "100% (Actual)" : `${slideSpeed}%`;
       applyFxDurations();
     }
-    syncVerticalMode();
-    document.getElementById("verticalRow").addEventListener("click", () => {
-      isVerticalMode = !isVerticalMode;
-      localStorage.setItem("flashcards_vertical_mode", isVerticalMode ? "1" : "0");
-      syncVerticalMode();
-    });
+    syncSlideSpeed();
     slideSpeedSlider.addEventListener("input", (e) => {
       slideSpeed = Number(e.target.value);
       localStorage.setItem("flashcards_slide_speed", slideSpeed);
-      syncVerticalMode();
+      syncSlideSpeed();
     });
 
     function initSegGroup(groupId, storageKey, currentVal, onChange) {
@@ -1489,73 +1461,75 @@
       });
     }
 
-    initSegGroup("btnFxGroup", "flashcards_btn_fx", btnFx, (val) => { btnFx = val; });
-    initSegGroup("topbarFxGroup", "flashcards_topbar_fx", topbarFx, (val) => { topbarFx = val; });
+    initSegGroup("cardFxGroup", "flashcards_card_fx", cardFx, (val) => { cardFx = val; });
 
-    const btnFxSection = document.getElementById("btnFxSection");
-    const btnFxSwitch = document.getElementById("btnFxSwitch");
-    const btnSpeedSlider = document.getElementById("btnSpeedSlider");
-    const btnSpeedVal = document.getElementById("btnSpeedVal");
-
-    const topbarFxSection = document.getElementById("topbarFxSection");
-    const topbarFxSwitch = document.getElementById("topbarFxSwitch");
-    const topbarSpeedSlider = document.getElementById("topbarSpeedSlider");
-    const topbarSpeedVal = document.getElementById("topbarSpeedVal");
-    const topbarIntSlider = document.getElementById("topbarIntSlider");
-    const topbarIntVal = document.getElementById("topbarIntVal");
+    const cardFxSection = document.getElementById("cardFxSection");
+    const cardFxSwitch = document.getElementById("cardFxSwitch");
+    const cardFxSpeedSlider = document.getElementById("cardFxSpeedSlider");
+    const cardFxSpeedVal = document.getElementById("cardFxSpeedVal");
+    const cardFxIntSlider = document.getElementById("cardFxIntSlider");
+    const cardFxIntVal = document.getElementById("cardFxIntVal");
 
     function syncFxUI() {
-      btnFxSwitch.classList.toggle("on", btnFxEnabled);
-      btnFxSection.classList.toggle("is-disabled", !btnFxEnabled);
-      btnSpeedSlider.value = btnSpeed;
-      btnSpeedVal.textContent = btnSpeed === 100 ? "100% (Máx)" : `${btnSpeed}%`;
-
-      topbarFxSwitch.classList.toggle("on", topbarFxEnabled);
-      topbarFxSection.classList.toggle("is-disabled", !topbarFxEnabled);
-      topbarSpeedSlider.value = topbarSpeed;
-      topbarSpeedVal.textContent = topbarSpeed === 100 ? "100% (Máx)" : `${topbarSpeed}%`;
-      topbarIntSlider.value = topbarIntensity;
-      topbarIntVal.textContent = `${topbarIntensity}%`;
+      cardFxSwitch.classList.toggle("on", cardFxEnabled);
+      cardFxSection.classList.toggle("is-disabled", !cardFxEnabled);
+      cardFxSpeedSlider.value = cardFxSpeed;
+      cardFxSpeedVal.textContent = cardFxSpeed === 100 ? "100% (Máx)" : `${cardFxSpeed}%`;
+      cardFxIntSlider.value = cardFxIntensity;
+      cardFxIntVal.textContent = `${cardFxIntensity}%`;
 
       applyFxDurations();
     }
 
-    document.getElementById("btnFxToggleRow").addEventListener("click", () => {
-      btnFxEnabled = !btnFxEnabled;
-      localStorage.setItem("flashcards_btn_fx_on", btnFxEnabled ? "1" : "0");
+    document.getElementById("cardFxToggleRow").addEventListener("click", () => {
+      cardFxEnabled = !cardFxEnabled;
+      localStorage.setItem("flashcards_card_fx_on", cardFxEnabled ? "1" : "0");
+      syncFxUI();
+      if (cardFxEnabled) triggerCardChangeFx();
+    });
+
+    cardFxSpeedSlider.addEventListener("input", (e) => {
+      cardFxSpeed = Number(e.target.value);
+      localStorage.setItem("flashcards_card_fx_speed", cardFxSpeed);
       syncFxUI();
     });
 
-    document.getElementById("topbarFxToggleRow").addEventListener("click", () => {
-      topbarFxEnabled = !topbarFxEnabled;
-      localStorage.setItem("flashcards_topbar_fx_on", topbarFxEnabled ? "1" : "0");
-      syncFxUI();
-      if (topbarFxEnabled) triggerCardChangeFx();
-    });
-
-    btnSpeedSlider.addEventListener("input", (e) => {
-      btnSpeed = Number(e.target.value);
-      localStorage.setItem("flashcards_btn_speed", btnSpeed);
+    cardFxIntSlider.addEventListener("input", (e) => {
+      cardFxIntensity = Number(e.target.value);
+      localStorage.setItem("flashcards_card_fx_int", cardFxIntensity);
       syncFxUI();
     });
 
-    topbarSpeedSlider.addEventListener("input", (e) => {
-      topbarSpeed = Number(e.target.value);
-      localStorage.setItem("flashcards_topbar_speed", topbarSpeed);
-      syncFxUI();
-    });
-
-    topbarIntSlider.addEventListener("input", (e) => {
-      topbarIntensity = Number(e.target.value);
-      localStorage.setItem("flashcards_topbar_int", topbarIntensity);
-      syncFxUI();
-    });
-
-    topbarIntSlider.addEventListener("change", () => {
-      if (topbarFxEnabled) triggerCardChangeFx();
+    cardFxIntSlider.addEventListener("change", () => {
+      if (cardFxEnabled) triggerCardChangeFx();
     });
 
     syncFxUI();
+
+    let bottomGlow = Number(localStorage.getItem("flashcards_bottom_glow") ?? 100);
+    const bottomGlowSlider = document.getElementById("bottomGlowSlider");
+    const bottomGlowVal = document.getElementById("bottomGlowVal");
+
+    function syncBottomGlow() {
+      const f = bottomGlow / 100;
+      const r = document.documentElement.style;
+      r.setProperty("--glow-p1", Math.round(18 * f) + "%");
+      r.setProperty("--glow-p2", Math.round(9 * f) + "%");
+      r.setProperty("--glow-inset", Math.round(8 * f) + "%");
+      r.setProperty("--glow-shadow", Math.round(18 * f) + "%");
+      r.setProperty("--glow-p1-c", Math.round(22 * f) + "%");
+      r.setProperty("--glow-p2-c", Math.round(10 * f) + "%");
+      r.setProperty("--glow-inset-c", Math.round(10 * f) + "%");
+      r.setProperty("--glow-shadow-c", Math.round(22 * f) + "%");
+      bottomGlowSlider.value = bottomGlow;
+      bottomGlowVal.textContent = bottomGlow === 0 ? "0% (Apagado)" : (bottomGlow === 100 ? "100% (Actual)" : `${bottomGlow}%`);
+    }
+    syncBottomGlow();
+    bottomGlowSlider.addEventListener("input", (e) => {
+      bottomGlow = Number(e.target.value);
+      localStorage.setItem("flashcards_bottom_glow", bottomGlow);
+      syncBottomGlow();
+    });
 
     // Mazos y carga .md
     function renderDeckList() {
@@ -1586,7 +1560,7 @@
 
         row.addEventListener("click", () => {
           selectDeck(deck.id);
-          closeAllDrawers();
+          showStudyView();
         });
         list.appendChild(row);
       });
@@ -1610,7 +1584,7 @@
       decks.push(newDeck);
       saveDecks();
       selectDeck(newDeck.id);
-      closeAllDrawers();
+      showStudyView();
     }
 
     document.getElementById("mdFileInput").addEventListener("change", async (e) => {
@@ -1655,6 +1629,7 @@
     }
 
     selectDeck(activeDeckId);
+    showHomeView();
     checkExternalInputs();
   </script>
 </body>
