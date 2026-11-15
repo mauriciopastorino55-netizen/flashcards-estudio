@@ -211,12 +211,30 @@
       justify-content: center;
     }
 
+    .stage.is-dragging {
+      overflow: hidden;
+      border-radius: 26px;
+    }
+
     .card-wrapper {
       width: 100%;
       height: 100%;
       position: relative;
       border-radius: 26px;
+      will-change: transform;
       transition: transform var(--card-slide-dur) cubic-bezier(0.22, 1, 0.36, 1), opacity var(--card-fade-dur) ease;
+    }
+
+    .peek-wrapper {
+      position: absolute;
+      inset: 0;
+      display: none;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .stage.is-dragging #cardWrapper {
+      z-index: 2;
     }
 
     .card-wrapper.slide-out-right {
@@ -715,10 +733,137 @@
       transform: translateX(20px);
     }
 
+    .home-actions {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn-upload {
+      flex: 1;
+      border: 1px dashed color-mix(in srgb, var(--accent-2) 60%, transparent);
+      background: color-mix(in srgb, var(--accent-2) 10%, transparent);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 13px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .btn-folder-new {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 13px 14px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .btn-folder-new:active,
+    .btn-upload:active {
+      transform: scale(0.98);
+    }
+
     .deck-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       gap: 10px;
+      padding-bottom: 10px;
+      scrollbar-width: none;
+    }
+
+    .deck-list::-webkit-scrollbar {
+      display: none;
+    }
+
+    .home-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .home-title-wrap .home-title {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .home-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: -8px;
+      flex-shrink: 0;
+    }
+
+    .crumb-btn {
+      background: none;
+      border: none;
+      padding: 2px 4px;
+      color: var(--accent-2);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .crumb-current {
+      color: var(--text);
+      font-weight: 600;
+      padding: 2px 4px;
+    }
+
+    .folder-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.15s ease, transform 0.12s ease;
+    }
+
+    .folder-row:active {
+      transform: scale(0.99);
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .folder-name {
+      font-size: 15px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+
+    .folder-arrow {
+      font-size: 16px;
+      color: var(--muted);
+      flex-shrink: 0;
     }
 
     .deck-item {
@@ -731,6 +876,7 @@
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.09);
       cursor: pointer;
+      flex-shrink: 0;
     }
 
     .deck-item.active {
@@ -740,6 +886,7 @@
 
     .deck-info {
       min-width: 0;
+      flex: 1;
     }
 
     .deck-name {
@@ -756,6 +903,25 @@
       margin-top: 2px;
     }
 
+    .deck-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn-mini {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 9px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
     .btn-del {
       background: rgba(255, 80, 100, 0.16);
       border: 1px solid rgba(255, 80, 100, 0.35);
@@ -768,16 +934,112 @@
       flex-shrink: 0;
     }
 
-    .btn-upload {
-      width: 100%;
-      border: 1px dashed color-mix(in srgb, var(--accent-2) 60%, transparent);
-      background: color-mix(in srgb, var(--accent-2) 10%, transparent);
-      color: var(--text);
-      border-radius: 14px;
-      padding: 14px;
-      font-size: 15px;
-      font-weight: 700;
+    .empty-state {
       text-align: center;
+      padding: 28px 16px;
+      color: var(--muted);
+      font-size: 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Modal Carpetas / Mover mazo */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 380px;
+      background: #141926;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 12px;
+      padding: 11px 12px;
+      color: var(--text);
+      font-size: 15px;
+      outline: none;
+      user-select: text;
+    }
+
+    .modal-input:focus {
+      border-color: var(--accent-2);
+    }
+
+    .modal-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 44dvh;
+      overflow-y: auto;
+    }
+
+    .modal-opt {
+      width: 100%;
+      text-align: left;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 11px 12px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .modal-opt.selected {
+      border-color: var(--accent-2);
+      background: color-mix(in srgb, var(--accent-2) 15%, rgba(255,255,255,0.04));
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      border: none;
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 9px 14px;
+      font-size: 13px;
+      font-weight: 700;
       cursor: pointer;
     }
 
@@ -796,19 +1058,31 @@
     <!-- Pantalla de Inicio (Mazos) -->
     <section class="home-view" id="homeView">
       <header class="home-header">
-        <div class="home-title">Mazos</div>
-        <button class="btn-icon open-settings-trigger" id="openSettings" aria-label="Ajustes" style="display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="3"></circle>
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-          </svg>
-        </button>
+        <div class="home-title-wrap">
+          <button type="button" class="btn-icon view-hidden" id="folderBackBtn" aria-label="Subir carpeta" style="padding:7px 10px;">←</button>
+          <div class="home-title" id="homeTitle">Mazos</div>
+        </div>
+        <div class="home-header-actions">
+          <button type="button" class="btn-mini view-hidden" id="folderRenameBtn">Renombrar</button>
+          <button type="button" class="btn-del view-hidden" id="folderDeleteBtn">Borrar</button>
+          <button class="btn-icon open-settings-trigger" id="openSettings" aria-label="Ajustes" style="display:inline-flex;align-items:center;justify-content:center;padding:8px 10px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+            </svg>
+          </button>
+        </div>
       </header>
 
-      <label class="btn-upload">
-        + Cargar archivo .md desde el celular
-        <input type="file" id="mdFileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden />
-      </label>
+      <div class="breadcrumb view-hidden" id="folderBreadcrumb"></div>
+
+      <div class="home-actions">
+        <label class="btn-upload">
+          + Cargar archivo .md
+          <input type="file" id="mdFileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" hidden />
+        </label>
+        <button type="button" class="btn-folder-new" id="newFolderBtn">+ Carpeta</button>
+      </div>
 
       <div class="deck-list" id="deckList"></div>
 
@@ -842,6 +1116,21 @@
                   <div class="style-concept" id="backText"></div>
                   <div class="author-pill" id="backAuthorPill"></div>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-wrapper peek-wrapper" id="peekWrapper" aria-hidden="true">
+          <div class="face is-def-face" id="peekFace">
+            <div class="face-header">
+              <span class="badge" id="peekBadge">Definición</span>
+              <span class="badge counter-badge" id="peekNum">2/19 · V1</span>
+            </div>
+            <div class="face-body">
+              <div class="face-center-wrap">
+                <div class="style-def" id="peekText"></div>
+                <div class="author-pill" id="peekAuthorPill"></div>
               </div>
             </div>
           </div>
@@ -931,9 +1220,14 @@
         <span>Velocidad de paso (↑/↓)</span>
         <span id="slideSpeedVal">100% (Actual)</span>
       </div>
-      <input type="range" id="slideSpeedSlider" min="50" max="200" step="10" value="100" />
+      <input type="range" id="slideSpeedSlider" min="50" max="400" step="10" value="100" />
     </div>
   </section>
+
+  <!-- Modal Carpetas / Mover -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+    <div class="modal-card" id="modalCard"></div>
+  </div>
 
 
 
@@ -970,11 +1264,15 @@
     ];
 
     const STORAGE_DECKS_KEY = "flashcards_decks_v1";
+    const STORAGE_FOLDERS_KEY = "flashcards_folders_v1";
     const STORAGE_ACTIVE_KEY = "flashcards_active_deck_v1";
 
+    let folders = loadFolders();
     let decks = loadDecks();
-    let activeDeckId = localStorage.getItem(STORAGE_ACTIVE_KEY) || "apolonio";
-    if (!decks.find(d => d.id === activeDeckId)) activeDeckId = decks[0].id;
+    let currentFolderId = null;
+    let activeDeckId = localStorage.getItem(STORAGE_ACTIVE_KEY) || "";
+    if (decks.length > 0 && !decks.find(d => d.id === activeDeckId)) activeDeckId = decks[0].id;
+    if (decks.length === 0) activeDeckId = "";
 
     let items = [];
     let activeFrontLabel = "Definición";
@@ -984,6 +1282,7 @@
     let history = [];
     let historyIndex = -1;
     let rounds = 0;
+    let pendingNext = null;
     let toastTimer = null;
     let isTransitioning = false;
     let isInverted = localStorage.getItem("flashcards_inverted") === "1";
@@ -991,6 +1290,12 @@
 
     const card = document.getElementById("card");
     const cardWrapper = document.getElementById("cardWrapper");
+    const peekWrapper = document.getElementById("peekWrapper");
+    const peekFace = document.getElementById("peekFace");
+    const peekBadge = document.getElementById("peekBadge");
+    const peekNum = document.getElementById("peekNum");
+    const peekText = document.getElementById("peekText");
+    const peekAuthorPill = document.getElementById("peekAuthorPill");
     const frontFace = document.getElementById("frontFace");
     const backFace = document.getElementById("backFace");
     const frontText = document.getElementById("frontText");
@@ -1033,15 +1338,30 @@
       }
     }
 
+    function loadFolders() {
+      try {
+        const raw = localStorage.getItem(STORAGE_FOLDERS_KEY);
+        if (raw !== null) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) return parsed;
+        }
+      } catch {}
+      return [];
+    }
+
+    function saveFolders() {
+      localStorage.setItem(STORAGE_FOLDERS_KEY, JSON.stringify(folders));
+    }
+
     function loadDecks() {
       try {
         const raw = localStorage.getItem(STORAGE_DECKS_KEY);
-        if (raw) {
+        if (raw !== null) {
           const parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed)) return parsed;
         }
       } catch {}
-      return [{ id: "apolonio", name: "Libro de Apolonio", items: DEFAULT_ITEMS, builtin: true }];
+      return [{ id: "apolonio", name: "Libro de Apolonio", items: DEFAULT_ITEMS, folderId: null, builtin: true }];
     }
 
     function saveDecks() {
@@ -1100,6 +1420,15 @@
     }
 
     function selectDeck(deckId) {
+      if (decks.length === 0) {
+        activeDeckId = "";
+        localStorage.removeItem(STORAGE_ACTIVE_KEY);
+        items = [];
+        history = [];
+        historyIndex = -1;
+        renderDeckList();
+        return;
+      }
       const deck = decks.find(d => d.id === deckId) || decks[0];
       activeDeckId = deck.id;
       localStorage.setItem(STORAGE_ACTIVE_KEY, activeDeckId);
@@ -1111,6 +1440,7 @@
       history = [];
       historyIndex = -1;
       rounds = 0;
+      pendingNext = null;
       card.style.transition = "none";
       card.classList.remove("is-flipped");
       loadNextItem();
@@ -1215,26 +1545,60 @@
       applyPalette(palette);
     }
 
+    function buildNextCandidate() {
+      if (pendingNext) return pendingNext;
+      let justCompletedRound = false;
+      let nextRound = rounds;
+      if (bag.length === 0) {
+        if (history.length > 0) {
+          nextRound = rounds + 1;
+          justCompletedRound = true;
+        }
+        refillBag();
+      }
+      const item = bag.shift();
+      lastId = item.id;
+      const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)];
+      pendingNext = { item, palette, round: nextRound, justCompletedRound };
+      return pendingNext;
+    }
+
     function loadNextItem() {
       if (historyIndex < history.length - 1) {
         historyIndex++;
       } else {
-        let justCompletedRound = false;
-        if (bag.length === 0) {
-          if (history.length > 0) {
-            rounds++;
-            justCompletedRound = true;
-          }
-          refillBag();
-        }
-        const item = bag.shift();
-        lastId = item.id;
-        const palette = PALETTES[Math.floor(Math.random() * PALETTES.length)];
-        history.push({ item, palette, round: rounds });
+        const next = buildNextCandidate();
+        pendingNext = null;
+        rounds = next.round;
+        history.push({ item: next.item, palette: next.palette, round: next.round });
         historyIndex = history.length - 1;
-        if (justCompletedRound) showRoundToast(rounds);
+        if (next.justCompletedRound) showRoundToast(rounds);
       }
       renderEntry(history[historyIndex], historyIndex + 1);
+    }
+
+    function renderPeekEntry(entry, number) {
+      const { item, palette, round } = entry;
+      const posInRound = ((number - 1) % items.length) + 1;
+      peekNum.textContent = `${posInRound}/${items.length} · V${round + 1}`;
+      peekWrapper.style.setProperty("--accent", palette[0]);
+      peekWrapper.style.setProperty("--accent-2", palette[1]);
+
+      if (isInverted) {
+        peekFace.classList.add("is-concept-face");
+        peekFace.classList.remove("is-def-face");
+        peekBadge.textContent = activeBackLabel;
+        peekText.className = "style-concept";
+        peekText.textContent = item.topic;
+        peekAuthorPill.textContent = item.authors || "";
+      } else {
+        peekFace.classList.remove("is-concept-face");
+        peekFace.classList.add("is-def-face");
+        peekBadge.textContent = activeFrontLabel;
+        peekText.className = "style-def";
+        peekText.textContent = item.def;
+        peekAuthorPill.textContent = "";
+      }
     }
 
     function transitionCard(direction, updateFn) {
@@ -1279,58 +1643,239 @@
       });
     }
 
+    let suppressNextClick = false;
     card.addEventListener("click", () => {
-      if (isTransitioning) return;
+      if (isTransitioning || suppressNextClick) return;
       card.classList.toggle("is-flipped");
     });
 
-    // Swipe vertical (↑/↓ entre tarjetas) y derecho (→ volver a Inicio)
+    // Arrastre continuo 1:1 estilo TikTok (↑/↓) y gesto derecho (→ volver a Inicio)
     let touchStartX = 0;
     let touchStartY = 0;
-    let touchStartScrollTop = 0;
+    let lastTouchX = 0;
+    let lastTouchY = 0;
+    let lastTouchTime = 0;
+    let dragVx = 0;
+    let dragVy = 0;
+    let dragMode = null; // null | "next" | "prev" | "bounce-top" | "home" | "scroll"
     let touchStartAtTop = true;
     let touchStartAtBottom = true;
+    let canBodyScroll = false;
+    let stageH = 0;
     const stage = document.getElementById("stage");
+    const CARD_GAP = 14;
 
     function getActiveFaceBody() {
       const activeFace = card.classList.contains("is-flipped") ? backFace : frontFace;
       return activeFace.querySelector(".face-body");
     }
 
+    function preparePeek(dir) {
+      stage.classList.add("is-dragging");
+      cardWrapper.style.transition = "none";
+      peekWrapper.style.transition = "none";
+      if (dir === "next") {
+        const entry = historyIndex < history.length - 1 ? history[historyIndex + 1] : buildNextCandidate();
+        renderPeekEntry(entry, historyIndex + 2);
+        peekWrapper.style.transform = `translateY(${stageH + CARD_GAP}px)`;
+      } else {
+        const entry = history[historyIndex - 1];
+        renderPeekEntry(entry, historyIndex);
+        peekWrapper.style.transform = `translateY(${-stageH - CARD_GAP}px)`;
+      }
+      peekWrapper.style.display = "block";
+    }
+
+    function cleanupDrag() {
+      stage.classList.remove("is-dragging");
+      cardWrapper.style.transition = "none";
+      cardWrapper.style.transform = "";
+      void cardWrapper.offsetWidth;
+      cardWrapper.style.transition = "";
+      peekWrapper.style.transition = "none";
+      peekWrapper.style.transform = "";
+      peekWrapper.style.display = "none";
+      dragMode = null;
+    }
+
     stage.addEventListener("touchstart", (e) => {
-      touchStartX = e.changedTouches[0].clientX;
-      touchStartY = e.changedTouches[0].clientY;
+      if (isTransitioning || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      touchStartX = lastTouchX = t.clientX;
+      touchStartY = lastTouchY = t.clientY;
+      lastTouchTime = Date.now();
+      dragVx = 0;
+      dragVy = 0;
+      dragMode = null;
+      stageH = stage.clientHeight || window.innerHeight;
+
       const bodyEl = getActiveFaceBody();
       if (bodyEl && bodyEl.scrollHeight > bodyEl.clientHeight + 4) {
-        touchStartScrollTop = bodyEl.scrollTop;
+        canBodyScroll = true;
         touchStartAtTop = bodyEl.scrollTop <= 6;
         touchStartAtBottom = bodyEl.scrollTop + bodyEl.clientHeight >= bodyEl.scrollHeight - 6;
       } else {
-        touchStartScrollTop = 0;
+        canBodyScroll = false;
         touchStartAtTop = true;
         touchStartAtBottom = true;
       }
     }, { passive: true });
 
-    stage.addEventListener("touchend", (e) => {
-      if (isTransitioning) return;
-      const dx = e.changedTouches[0].clientX - touchStartX;
-      const dy = e.changedTouches[0].clientY - touchStartY;
-      if (dx > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-        isTransitioning = true;
-        cardWrapper.classList.add("slide-out-right");
-        setTimeout(() => {
-          showHomeView(true);
-          cardWrapper.classList.remove("slide-out-right");
-          isTransitioning = false;
-        }, 170);
+    stage.addEventListener("touchmove", (e) => {
+      if (isTransitioning || e.touches.length !== 1) return;
+      const t = e.touches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      const now = Date.now();
+      const dt = Math.max(8, now - lastTouchTime);
+      dragVx = 0.65 * ((t.clientX - lastTouchX) / dt) + 0.35 * dragVx;
+      dragVy = 0.65 * ((t.clientY - lastTouchY) / dt) + 0.35 * dragVy;
+      lastTouchX = t.clientX;
+      lastTouchY = t.clientY;
+      lastTouchTime = now;
+
+      if (dragMode === null) {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+        if (Math.abs(dx) > Math.abs(dy) * 1.25 && dx > 0) {
+          dragMode = "home";
+          stage.classList.add("is-dragging");
+          cardWrapper.style.transition = "none";
+        } else if (Math.abs(dy) >= Math.abs(dx)) {
+          if (dy < 0 && (!canBodyScroll || touchStartAtBottom)) {
+            dragMode = "next";
+            preparePeek("next");
+          } else if (dy > 0 && (!canBodyScroll || touchStartAtTop)) {
+            if (historyIndex > 0) {
+              dragMode = "prev";
+              preparePeek("prev");
+            } else {
+              dragMode = "bounce-top";
+              cardWrapper.style.transition = "none";
+            }
+          } else {
+            dragMode = "scroll";
+          }
+        } else {
+          dragMode = "scroll";
+        }
+      }
+
+      if (dragMode === "scroll") return;
+      e.preventDefault();
+
+      if (dragMode === "next") {
+        const y = Math.min(0, dy);
+        cardWrapper.style.transform = `translateY(${y}px)`;
+        peekWrapper.style.transform = `translateY(${stageH + CARD_GAP + y}px)`;
+      } else if (dragMode === "prev") {
+        const y = Math.max(0, dy);
+        cardWrapper.style.transform = `translateY(${y}px)`;
+        peekWrapper.style.transform = `translateY(${-stageH - CARD_GAP + y}px)`;
+      } else if (dragMode === "bounce-top") {
+        const y = Math.max(0, dy) * 0.22;
+        cardWrapper.style.transform = `translateY(${y}px)`;
+      } else if (dragMode === "home") {
+        const x = Math.max(0, dx);
+        cardWrapper.style.transform = `translateX(${x}px)`;
+      }
+    }, { passive: false });
+
+    function finishTouchDrag(e) {
+      if (!dragMode || dragMode === "scroll") {
+        dragMode = null;
         return;
       }
-      if (Math.abs(dy) > 55 && Math.abs(dy) > Math.abs(dx) * 1.3) {
-        if (dy < 0 && touchStartAtBottom) goNext();
-        else if (dy > 0 && touchStartAtTop) goPrev();
+      suppressNextClick = true;
+      setTimeout(() => { suppressNextClick = false; }, 80);
+
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartX;
+      const dy = t.clientY - touchStartY;
+      const snapMs = Math.max(60, Math.round(190 * (100 / slideSpeed)));
+      const ease = `transform ${snapMs}ms cubic-bezier(0.22, 1, 0.36, 1)`;
+
+      if (dragMode === "home") {
+        isTransitioning = true;
+        cardWrapper.style.transition = ease;
+        if (dx > 75 || dragVx > 0.4) {
+          cardWrapper.style.transform = "translateX(108%)";
+          setTimeout(() => {
+            showHomeView(true);
+            cleanupDrag();
+            isTransitioning = false;
+          }, snapMs);
+        } else {
+          cardWrapper.style.transform = "translateX(0)";
+          setTimeout(() => {
+            cleanupDrag();
+            isTransitioning = false;
+          }, snapMs);
+        }
+        return;
       }
-    }, { passive: true });
+
+      if (dragMode === "bounce-top") {
+        isTransitioning = true;
+        cardWrapper.style.transition = ease;
+        cardWrapper.style.transform = "translateY(0)";
+        setTimeout(() => {
+          cleanupDrag();
+          isTransitioning = false;
+        }, snapMs);
+        return;
+      }
+
+      const mode = dragMode;
+      const commitNext = mode === "next" && (-dy > stageH * 0.22 || dragVy < -0.35);
+      const commitPrev = mode === "prev" && (dy > stageH * 0.22 || dragVy > 0.35);
+
+      isTransitioning = true;
+      cardWrapper.style.transition = ease;
+      peekWrapper.style.transition = ease;
+
+      if (commitNext) {
+        cardWrapper.style.transform = `translateY(${-stageH - CARD_GAP}px)`;
+        peekWrapper.style.transform = "translateY(0)";
+        setTimeout(() => {
+          card.style.transition = "none";
+          card.classList.remove("is-flipped");
+          loadNextItem();
+          cleanupDrag();
+          requestAnimationFrame(() => {
+            card.style.transition = "";
+            triggerCardChangeFx();
+            isTransitioning = false;
+          });
+        }, snapMs);
+      } else if (commitPrev) {
+        cardWrapper.style.transform = `translateY(${stageH + CARD_GAP}px)`;
+        peekWrapper.style.transform = "translateY(0)";
+        setTimeout(() => {
+          card.style.transition = "none";
+          card.classList.remove("is-flipped");
+          historyIndex--;
+          renderEntry(history[historyIndex], historyIndex + 1);
+          cleanupDrag();
+          requestAnimationFrame(() => {
+            card.style.transition = "";
+            triggerCardChangeFx();
+            isTransitioning = false;
+          });
+        }, snapMs);
+      } else {
+        cardWrapper.style.transform = "translateY(0)";
+        peekWrapper.style.transform = mode === "next"
+          ? `translateY(${stageH + CARD_GAP}px)`
+          : `translateY(${-stageH - CARD_GAP}px)`;
+        setTimeout(() => {
+          cleanupDrag();
+          isTransitioning = false;
+        }, snapMs);
+      }
+    }
+
+    stage.addEventListener("touchend", finishTouchDrag, { passive: true });
+    stage.addEventListener("touchcancel", finishTouchDrag, { passive: true });
 
     let homeTouchStartX = 0;
     let homeTouchStartY = 0;
@@ -1340,7 +1885,7 @@
     }, { passive: true });
 
     homeView.addEventListener("touchend", (e) => {
-      if (isTransitioning || settingsDrawer.classList.contains("open") || !items.length) return;
+      if (isTransitioning || settingsDrawer.classList.contains("open") || modalBackdrop.classList.contains("open") || !items.length) return;
       const dx = e.changedTouches[0].clientX - homeTouchStartX;
       const dy = e.changedTouches[0].clientY - homeTouchStartY;
       if (dx < -55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
@@ -1532,39 +2077,348 @@
       syncBottomGlow();
     });
 
+    // Modal y gestión de carpetas/mazos
+    const modalBackdrop = document.getElementById("modalBackdrop");
+    const modalCard = document.getElementById("modalCard");
+
+    function closeModal() {
+      modalBackdrop.classList.remove("open");
+      modalBackdrop.setAttribute("aria-hidden", "true");
+      modalCard.innerHTML = "";
+    }
+
+    modalBackdrop.addEventListener("click", (e) => {
+      if (e.target === modalBackdrop) closeModal();
+    });
+
+    function openFolderNameModal({ title, initialValue = "", confirmLabel = "Guardar", onSave }) {
+      modalCard.innerHTML = "";
+      const h = document.createElement("div");
+      h.className = "modal-title";
+      h.textContent = title;
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "modal-input";
+      input.placeholder = "Nombre de la carpeta...";
+      input.value = initialValue;
+
+      const actions = document.createElement("div");
+      actions.className = "modal-actions";
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "btn-mini";
+      cancelBtn.textContent = "Cancelar";
+      cancelBtn.addEventListener("click", closeModal);
+
+      const okBtn = document.createElement("button");
+      okBtn.type = "button";
+      okBtn.className = "btn-primary";
+      okBtn.textContent = confirmLabel;
+
+      const submit = () => {
+        const val = input.value.trim();
+        if (!val) return;
+        onSave(val);
+        closeModal();
+      };
+      okBtn.addEventListener("click", submit);
+      input.addEventListener("keydown", (e) => { if (e.key === "Enter") submit(); });
+
+      actions.append(cancelBtn, okBtn);
+      modalCard.append(h, input, actions);
+      modalBackdrop.classList.add("open");
+      modalBackdrop.setAttribute("aria-hidden", "false");
+      setTimeout(() => { input.focus(); input.select(); }, 30);
+    }
+
+    function getFolderPath(folderId) {
+      const chain = [];
+      let cur = folders.find(f => f.id === folderId);
+      const seen = new Set();
+      while (cur && !seen.has(cur.id)) {
+        seen.add(cur.id);
+        chain.unshift(cur);
+        cur = cur.parentId ? folders.find(f => f.id === cur.parentId) : null;
+      }
+      return chain;
+    }
+
+    function openMoveDeckModal(deck) {
+      modalCard.innerHTML = "";
+      const h = document.createElement("div");
+      h.className = "modal-title";
+      h.textContent = `Mover "${deck.name}"`;
+
+      const list = document.createElement("div");
+      list.className = "modal-list";
+
+      const noneBtn = document.createElement("button");
+      noneBtn.type = "button";
+      noneBtn.className = "modal-opt" + (!deck.folderId ? " selected" : "");
+      noneBtn.textContent = "Inicio (raíz)";
+      noneBtn.addEventListener("click", () => {
+        deck.folderId = null;
+        saveDecks();
+        renderDeckList();
+        closeModal();
+      });
+      list.appendChild(noneBtn);
+
+      folders.forEach(folder => {
+        const pathLabel = getFolderPath(folder.id).map(f => f.name).join(" / ");
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "modal-opt" + (deck.folderId === folder.id ? " selected" : "");
+        btn.textContent = `📁 ${pathLabel}`;
+        btn.addEventListener("click", () => {
+          deck.folderId = folder.id;
+          saveDecks();
+          renderDeckList();
+          closeModal();
+        });
+        list.appendChild(btn);
+      });
+
+      const actions = document.createElement("div");
+      actions.className = "modal-actions";
+
+      const newBtn = document.createElement("button");
+      newBtn.type = "button";
+      newBtn.className = "btn-primary";
+      newBtn.textContent = "+ Nueva carpeta aquí";
+      newBtn.addEventListener("click", () => {
+        openFolderNameModal({
+          title: "Nueva carpeta",
+          confirmLabel: "Crear y mover",
+          onSave: (name) => {
+            const folder = { id: "folder_" + Date.now(), name, parentId: currentFolderId };
+            folders.push(folder);
+            deck.folderId = folder.id;
+            saveFolders();
+            saveDecks();
+            renderDeckList();
+          }
+        });
+      });
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "btn-mini";
+      cancelBtn.textContent = "Cerrar";
+      cancelBtn.addEventListener("click", closeModal);
+
+      actions.append(cancelBtn, newBtn);
+      modalCard.append(h, list, actions);
+      modalBackdrop.classList.add("open");
+      modalBackdrop.setAttribute("aria-hidden", "false");
+    }
+
+    document.getElementById("newFolderBtn").addEventListener("click", () => {
+      openFolderNameModal({
+        title: currentFolderId ? "Nueva subcarpeta" : "Nueva carpeta",
+        confirmLabel: "Crear",
+        onSave: (name) => {
+          folders.push({ id: "folder_" + Date.now(), name, parentId: currentFolderId });
+          saveFolders();
+          renderDeckList();
+        }
+      });
+    });
+
+    const folderBackBtn = document.getElementById("folderBackBtn");
+    const homeTitle = document.getElementById("homeTitle");
+    const folderRenameBtn = document.getElementById("folderRenameBtn");
+    const folderDeleteBtn = document.getElementById("folderDeleteBtn");
+    const folderBreadcrumb = document.getElementById("folderBreadcrumb");
+
+    folderBackBtn.addEventListener("click", () => {
+      const cur = folders.find(f => f.id === currentFolderId);
+      currentFolderId = cur ? (cur.parentId || null) : null;
+      renderDeckList();
+    });
+
+    folderRenameBtn.addEventListener("click", () => {
+      const cur = folders.find(f => f.id === currentFolderId);
+      if (!cur) return;
+      openFolderNameModal({
+        title: "Renombrar carpeta",
+        initialValue: cur.name,
+        confirmLabel: "Guardar",
+        onSave: (newName) => {
+          cur.name = newName;
+          saveFolders();
+          renderDeckList();
+        }
+      });
+    });
+
+    folderDeleteBtn.addEventListener("click", () => {
+      const cur = folders.find(f => f.id === currentFolderId);
+      if (!cur) return;
+      const parent = cur.parentId || null;
+      if (!confirm(`¿Borrar la carpeta "${cur.name}"? Su contenido subirá un nivel.`)) return;
+      folders.forEach(f => { if (f.parentId === cur.id) f.parentId = parent; });
+      decks.forEach(d => { if (d.folderId === cur.id) d.folderId = parent; });
+      folders = folders.filter(f => f.id !== cur.id);
+      currentFolderId = parent;
+      saveFolders();
+      saveDecks();
+      renderDeckList();
+    });
+
+    function createDeckRow(deck) {
+      const row = document.createElement("div");
+      row.className = "deck-item" + (deck.id === activeDeckId ? " active" : "");
+
+      const info = document.createElement("div");
+      info.className = "deck-info";
+      const nameEl = document.createElement("div");
+      nameEl.className = "deck-name";
+      nameEl.textContent = deck.name;
+      const metaEl = document.createElement("div");
+      metaEl.className = "deck-meta";
+      metaEl.textContent = `${deck.items.length} tarjetas`;
+      info.append(nameEl, metaEl);
+      row.appendChild(info);
+
+      const actions = document.createElement("div");
+      actions.className = "deck-actions";
+
+      const moveBtn = document.createElement("button");
+      moveBtn.type = "button";
+      moveBtn.className = "btn-mini";
+      moveBtn.textContent = "Mover";
+      moveBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        openMoveDeckModal(deck);
+      });
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "btn-del";
+      delBtn.textContent = "Borrar";
+      delBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        if (!confirm(`¿Borrar el mazo "${deck.name}"?`)) return;
+        decks = decks.filter(d => d.id !== deck.id);
+        saveDecks();
+        if (activeDeckId === deck.id) selectDeck(decks[0] ? decks[0].id : "");
+        else renderDeckList();
+      });
+
+      actions.append(moveBtn, delBtn);
+      row.appendChild(actions);
+
+      row.addEventListener("click", () => {
+        selectDeck(deck.id);
+        showStudyView();
+      });
+      return row;
+    }
+
     // Mazos y carga .md
     function renderDeckList() {
       const list = document.getElementById("deckList");
       list.innerHTML = "";
-      decks.forEach(deck => {
+
+      const folderIds = new Set(folders.map(f => f.id));
+      if (currentFolderId && !folderIds.has(currentFolderId)) currentFolderId = null;
+
+      const curFolder = currentFolderId ? folders.find(f => f.id === currentFolderId) : null;
+      homeTitle.textContent = curFolder ? curFolder.name : "Mazos";
+      folderBackBtn.classList.toggle("view-hidden", !curFolder);
+      folderRenameBtn.classList.toggle("view-hidden", !curFolder);
+      folderDeleteBtn.classList.toggle("view-hidden", !curFolder);
+
+      folderBreadcrumb.innerHTML = "";
+      if (curFolder) {
+        folderBreadcrumb.classList.remove("view-hidden");
+        const rootBtn = document.createElement("button");
+        rootBtn.type = "button";
+        rootBtn.className = "crumb-btn";
+        rootBtn.textContent = "Inicio";
+        rootBtn.addEventListener("click", () => {
+          currentFolderId = null;
+          renderDeckList();
+        });
+        folderBreadcrumb.appendChild(rootBtn);
+
+        const chain = getFolderPath(curFolder.id);
+        chain.forEach((f, idx) => {
+          const sep = document.createElement("span");
+          sep.textContent = "›";
+          folderBreadcrumb.appendChild(sep);
+          if (idx === chain.length - 1) {
+            const curSpan = document.createElement("span");
+            curSpan.className = "crumb-current";
+            curSpan.textContent = f.name;
+            folderBreadcrumb.appendChild(curSpan);
+          } else {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "crumb-btn";
+            btn.textContent = f.name;
+            btn.addEventListener("click", () => {
+              currentFolderId = f.id;
+              renderDeckList();
+            });
+            folderBreadcrumb.appendChild(btn);
+          }
+        });
+      } else {
+        folderBreadcrumb.classList.add("view-hidden");
+      }
+
+      const childFolders = folders.filter(f => {
+        const pid = f.parentId && folderIds.has(f.parentId) ? f.parentId : null;
+        return pid === currentFolderId;
+      });
+
+      childFolders.forEach(folder => {
         const row = document.createElement("div");
-        row.className = "deck-item" + (deck.id === activeDeckId ? " active" : "");
-
-        const info = document.createElement("div");
-        info.className = "deck-info";
-        info.innerHTML = `<div class="deck-name">${deck.name}</div><div class="deck-meta">${deck.items.length} tarjetas</div>`;
-        row.appendChild(info);
-
-        if (!deck.builtin) {
-          const del = document.createElement("button");
-          del.className = "btn-del";
-          del.textContent = "Borrar";
-          del.addEventListener("click", (e) => {
-            e.stopPropagation();
-            decks = decks.filter(d => d.id !== deck.id);
-            saveDecks();
-            if (activeDeckId === deck.id) selectDeck(decks[0].id);
-            else renderDeckList();
-          });
-          row.appendChild(del);
-        }
-
+        row.className = "folder-row";
+        const nameEl = document.createElement("span");
+        nameEl.className = "folder-name";
+        nameEl.textContent = `📁 ${folder.name}`;
+        const arrow = document.createElement("span");
+        arrow.className = "folder-arrow";
+        arrow.textContent = "›";
+        row.append(nameEl, arrow);
         row.addEventListener("click", () => {
-          selectDeck(deck.id);
-          showStudyView();
+          currentFolderId = folder.id;
+          renderDeckList();
         });
         list.appendChild(row);
       });
+
+      const currentDecks = decks.filter(d => {
+        const fid = d.folderId && folderIds.has(d.folderId) ? d.folderId : null;
+        return fid === currentFolderId;
+      });
+      currentDecks.forEach(deck => list.appendChild(createDeckRow(deck)));
+
+      if (childFolders.length === 0 && currentDecks.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.innerHTML = curFolder
+          ? "<div>Carpeta vacía. Creá una subcarpeta o cargá un archivo .md acá.</div>"
+          : "<div>No tenés mazos cargados.</div>";
+        if (!curFolder && decks.length === 0) {
+          const restoreBtn = document.createElement("button");
+          restoreBtn.type = "button";
+          restoreBtn.className = "btn-mini";
+          restoreBtn.textContent = "Restaurar mazo de ejemplo";
+          restoreBtn.addEventListener("click", () => {
+            decks = [{ id: "apolonio", name: "Libro de Apolonio", items: DEFAULT_ITEMS, folderId: null, builtin: true }];
+            saveDecks();
+            selectDeck("apolonio");
+          });
+          empty.appendChild(restoreBtn);
+        }
+        list.appendChild(empty);
+      }
     }
 
     function importMarkdownText(text, filename) {
@@ -1580,6 +2434,7 @@
         items: parsed,
         frontLabel: frontLabel || "Definición",
         backLabel: backLabel || "Concepto",
+        folderId: currentFolderId,
         builtin: false
       };
       decks.push(newDeck);
@@ -1629,7 +2484,7 @@
       });
     }
 
-    selectDeck(activeDeckId);
+    if (activeDeckId) selectDeck(activeDeckId);
     showHomeView();
     checkExternalInputs();
   </script>
