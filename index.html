@@ -215,6 +215,7 @@
       width: 100%;
       height: 100%;
       position: relative;
+      border-radius: 26px;
       transition: transform var(--card-slide-dur) cubic-bezier(0.22, 1, 0.36, 1), opacity var(--card-fade-dur) ease;
     }
 
@@ -473,24 +474,9 @@
     }
 
     @keyframes cardPulseStep {
-      0% {
-        box-shadow:
-          0 20px 50px rgba(0, 0, 0, 0.55),
-          0 10px 30px color-mix(in srgb, var(--accent) 20%, transparent),
-          0 0 0 0 color-mix(in srgb, var(--accent-2) var(--card-fx-pct), transparent);
-      }
-      75% {
-        box-shadow:
-          0 20px 50px rgba(0, 0, 0, 0.55),
-          0 10px 30px color-mix(in srgb, var(--accent) 18%, transparent),
-          0 0 0 15px rgba(34, 211, 238, 0);
-      }
-      100% {
-        box-shadow:
-          0 20px 50px rgba(0, 0, 0, 0.55),
-          0 10px 30px color-mix(in srgb, var(--accent) 18%, transparent),
-          0 0 0 16px rgba(34, 211, 238, 0);
-      }
+      0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent-2) var(--card-fx-pct), transparent); }
+      75% { box-shadow: 0 0 0 15px rgba(34, 211, 238, 0); }
+      100% { box-shadow: 0 0 0 16px rgba(34, 211, 238, 0); }
     }
 
     .card-wrapper.fx-edge .face::after,
@@ -498,8 +484,8 @@
       animation: borderSweep var(--card-fx-dur) cubic-bezier(0.22, 1, 0.36, 1) forwards;
     }
 
-    .card-wrapper.fx-pulse .face,
-    .card-wrapper.fx-edge-pulse .face {
+    .card-wrapper.fx-pulse,
+    .card-wrapper.fx-edge-pulse {
       animation: cardPulseStep var(--card-fx-dur) ease-out;
     }
 
@@ -509,7 +495,7 @@
       100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0); }
     }
 
-    .card-wrapper.celebrate .face {
+    .card-wrapper.celebrate {
       animation: pulseCelebrate 0.8s ease-out;
     }
 
@@ -565,6 +551,20 @@
       font-size: 13px;
       color: var(--text);
       font-weight: 600;
+    }
+
+    .seg-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.9px;
+      color: var(--accent-2);
+    }
+
+    .seg-divider {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 2px 0;
     }
 
     .seg-group.is-disabled .seg-options,
@@ -628,8 +628,8 @@
       transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
       display: flex;
       flex-direction: column;
-      gap: 18px;
-      max-height: 82dvh;
+      gap: 14px;
+      max-height: 84dvh;
       overflow-y: auto;
     }
 
@@ -887,6 +887,7 @@
     </div>
 
     <div class="seg-group" id="cardFxSection">
+      <div class="seg-section-title">Características de efectos de tarjeta</div>
       <div class="seg-head" id="cardFxToggleRow">
         <span class="seg-label">Efecto al cambiar tarjeta</span>
         <div class="switch" id="cardFxSwitch"></div>
@@ -905,10 +906,18 @@
       </div>
       <div class="slider-group seg-speed">
         <div class="slider-label">
-          <span>Intensidad</span>
+          <span>Intensidad del efecto</span>
           <span id="cardFxIntVal">85%</span>
         </div>
         <input type="range" id="cardFxIntSlider" min="15" max="100" step="5" value="85" />
+      </div>
+      <div class="seg-divider"></div>
+      <div class="slider-group">
+        <div class="slider-label">
+          <span>Resplandor inferior</span>
+          <span id="bottomGlowVal">100% (Actual)</span>
+        </div>
+        <input type="range" id="bottomGlowSlider" min="0" max="200" step="10" value="100" />
       </div>
     </div>
 
@@ -923,14 +932,6 @@
         <span id="slideSpeedVal">100% (Actual)</span>
       </div>
       <input type="range" id="slideSpeedSlider" min="50" max="200" step="10" value="100" />
-    </div>
-
-    <div class="slider-group">
-      <div class="slider-label">
-        <span>Resplandor inferior</span>
-        <span id="bottomGlowVal">100% (Actual)</span>
-      </div>
-      <input type="range" id="bottomGlowSlider" min="0" max="200" step="10" value="100" />
     </div>
   </section>
 
