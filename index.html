@@ -40,6 +40,7 @@
       --front-size: 20px;
       --back-size: 28px;
       --author-size: 16px;
+      --detail-size: 17px;
       --card-fx-dur: 0.72s;
       --card-fx-int: 0.85;
       --card-fx-pct: 55%;
@@ -269,6 +270,87 @@
       transform: translateX(105%);
       opacity: 0;
       transition: none !important;
+    }
+
+    .card-wrapper.slide-in-prep-left {
+      transform: translateX(-105%);
+      opacity: 0;
+      transition: none !important;
+    }
+
+    .detail-view {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-height: 0;
+      transition: transform var(--card-slide-dur) cubic-bezier(0.22, 1, 0.36, 1), opacity var(--card-fade-dur) ease;
+    }
+
+    .detail-view.slide-out-right {
+      transform: translateX(105%);
+      opacity: 0;
+    }
+
+    .detail-view.slide-in-prep-right {
+      transform: translateX(105%);
+      opacity: 0;
+      transition: none !important;
+    }
+
+    .detail-card {
+      flex: 1;
+      min-height: 0;
+      border-radius: 26px;
+      padding: 22px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      background: linear-gradient(155deg, rgba(255,255,255,0.045) 0%, rgba(255,255,255,0.015) 100%), var(--surface);
+      border: 1px solid color-mix(in srgb, var(--accent) 34%, rgba(255,255,255,0.09));
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    .detail-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      flex-shrink: 0;
+    }
+
+    .detail-topic {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .detail-body {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      overscroll-behavior: contain;
+      font-size: var(--detail-size);
+      line-height: 1.62;
+      color: var(--text);
+      font-weight: 430;
+      text-align: justify;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      hyphenate-limit-chars: 6 3 2;
+      white-space: pre-line;
+      padding-right: 2px;
+      scrollbar-width: none;
+    }
+
+    .detail-body::-webkit-scrollbar {
+      display: none;
     }
 
     .card-wrapper.slide-out-up {
@@ -1223,8 +1305,17 @@
           </div>
         </div>
       </main>
+    </section>
 
-
+    <!-- Vista de Desarrollo (puro texto con scroll) -->
+    <section class="detail-view view-hidden" id="detailView">
+      <div class="detail-card">
+        <div class="detail-header">
+          <span class="badge">Desarrollo</span>
+          <span class="detail-topic" id="detailTopic"></span>
+        </div>
+        <div class="detail-body" id="detailBody"></div>
+      </div>
     </section>
   </div>
 
@@ -1260,6 +1351,14 @@
         <span id="authorSizeVal">16 px</span>
       </div>
       <input type="range" id="authorSlider" min="12" max="26" step="1" value="16" />
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Tamaño de desarrollo</span>
+        <span id="detailSizeVal">17 px</span>
+      </div>
+      <input type="range" id="detailSlider" min="14" max="28" step="1" value="17" />
     </div>
 
     <div class="seg-group" id="cardFxSection">
@@ -1418,6 +1517,9 @@
     const peekEmoji = document.getElementById("peekEmoji");
     const homeView = document.getElementById("homeView");
     const studyView = document.getElementById("studyView");
+    const detailView = document.getElementById("detailView");
+    const detailTopic = document.getElementById("detailTopic");
+    const detailBody = document.getElementById("detailBody");
 
     function showHomeView(fromSwipe = false) {
       renderDeckList();
@@ -1434,9 +1536,41 @@
       }
     }
 
+    function showDetailView(item, fromSwipe = false) {
+      detailTopic.textContent = item.topic || "";
+      detailBody.textContent = item.detail || "";
+      detailBody.scrollTop = 0;
+      detailView.classList.remove("slide-out-right");
+      if (fromSwipe) detailView.classList.add("slide-in-prep-right");
+      studyView.classList.add("view-hidden");
+      detailView.classList.remove("view-hidden");
+      if (fromSwipe) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            detailView.classList.remove("slide-in-prep-right");
+          });
+        });
+      }
+    }
+
+    function showStudyViewFromDetail(fromSwipe = false) {
+      cardWrapper.classList.remove("slide-out-right");
+      if (fromSwipe) cardWrapper.classList.add("slide-in-prep-left");
+      detailView.classList.add("view-hidden");
+      studyView.classList.remove("view-hidden");
+      if (fromSwipe) {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            cardWrapper.classList.remove("slide-in-prep-left");
+          });
+        });
+      }
+    }
+
     function showStudyView(fromSwipe = false) {
       cardWrapper.classList.remove("slide-out-right");
       if (fromSwipe) cardWrapper.classList.add("slide-in-prep-right");
+      detailView.classList.add("view-hidden");
       homeView.classList.add("view-hidden");
       studyView.classList.remove("view-hidden");
       if (fromSwipe) {
@@ -1505,15 +1639,23 @@
           bodyText = bodyText.slice(0, authMatch.index).trim();
         }
 
+        let detailText = "";
+        const devMatch = bodyText.match(/(?:^|\n)Desarrollo\s*:\s*\n?([\s\S]+)$/i);
+        if (devMatch) {
+          detailText = devMatch[1].trim();
+          bodyText = bodyText.slice(0, devMatch.index).trim();
+        }
+
         const cleanTitle = currentTitle.replace(/^\d+[\.\)]\s*/, "").replace(/[*_`]/g, "").trim();
-        const cleanBody = bodyText.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/`([^`]+)`/g, "$1");
+        const cleanMd = (s) => s.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/`([^`]+)`/g, "$1");
 
         parsed.push({
           id: parsed.length + 1,
           topic: cleanTitle,
           authors,
           icon,
-          def: cleanBody
+          def: cleanMd(bodyText),
+          detail: cleanMd(detailText)
         });
       };
 
@@ -1972,6 +2114,11 @@
           dragMode = "home";
           stage.classList.add("is-dragging");
           cardWrapper.style.transition = "none";
+        } else if (Math.abs(dx) > Math.abs(dy) * 1.25 && dx < 0) {
+          const curItem = history[historyIndex] && history[historyIndex].item;
+          dragMode = (curItem && curItem.detail && curItem.detail.trim()) ? "detail" : "bounce-left";
+          stage.classList.add("is-dragging");
+          cardWrapper.style.transition = "none";
         } else if (Math.abs(dy) >= Math.abs(dx)) {
           if (dy < 0 && (!canBodyScroll || touchStartAtBottom)) {
             dragMode = "next";
@@ -2009,6 +2156,12 @@
       } else if (dragMode === "home") {
         const x = Math.max(0, dx);
         cardWrapper.style.transform = `translateX(${x}px)`;
+      } else if (dragMode === "detail") {
+        const x = Math.min(0, dx);
+        cardWrapper.style.transform = `translateX(${x}px)`;
+      } else if (dragMode === "bounce-left") {
+        const x = Math.min(0, dx) * 0.18;
+        cardWrapper.style.transform = `translateX(${x}px)`;
       }
     }, { passive: false });
 
@@ -2043,6 +2196,38 @@
             isTransitioning = false;
           }, snapMs);
         }
+        return;
+      }
+
+      if (dragMode === "detail") {
+        isTransitioning = true;
+        cardWrapper.style.transition = ease;
+        const curItem = history[historyIndex] && history[historyIndex].item;
+        if ((dx < -65 || dragVx < -0.4) && curItem && curItem.detail) {
+          cardWrapper.style.transform = "translateX(-108%)";
+          setTimeout(() => {
+            showDetailView(curItem, true);
+            cleanupDrag();
+            isTransitioning = false;
+          }, snapMs);
+        } else {
+          cardWrapper.style.transform = "translateX(0)";
+          setTimeout(() => {
+            cleanupDrag();
+            isTransitioning = false;
+          }, snapMs);
+        }
+        return;
+      }
+
+      if (dragMode === "bounce-left") {
+        isTransitioning = true;
+        cardWrapper.style.transition = ease;
+        cardWrapper.style.transform = "translateX(0)";
+        setTimeout(() => {
+          cleanupDrag();
+          isTransitioning = false;
+        }, snapMs);
         return;
       }
 
@@ -2108,6 +2293,28 @@
 
     stage.addEventListener("touchend", finishTouchDrag, { passive: true });
     stage.addEventListener("touchcancel", finishTouchDrag, { passive: true });
+
+    let detailTouchStartX = 0;
+    let detailTouchStartY = 0;
+    detailView.addEventListener("touchstart", (e) => {
+      detailTouchStartX = e.changedTouches[0].clientX;
+      detailTouchStartY = e.changedTouches[0].clientY;
+    }, { passive: true });
+
+    detailView.addEventListener("touchend", (e) => {
+      if (isTransitioning) return;
+      const dx = e.changedTouches[0].clientX - detailTouchStartX;
+      const dy = e.changedTouches[0].clientY - detailTouchStartY;
+      if (dx > 55 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+        isTransitioning = true;
+        detailView.classList.add("slide-out-right");
+        setTimeout(() => {
+          showStudyViewFromDetail(true);
+          detailView.classList.remove("slide-out-right");
+          isTransitioning = false;
+        }, 170);
+      }
+    }, { passive: true });
 
     let homeTouchStartX = 0;
     let homeTouchStartY = 0;
@@ -2199,9 +2406,11 @@
     const frontSlider = document.getElementById("frontSlider");
     const backSlider = document.getElementById("backSlider");
     const authorSlider = document.getElementById("authorSlider");
+    const detailSlider = document.getElementById("detailSlider");
     const frontSizeVal = document.getElementById("frontSizeVal");
     const backSizeVal = document.getElementById("backSizeVal");
     const authorSizeVal = document.getElementById("authorSizeVal");
+    const detailSizeVal = document.getElementById("detailSizeVal");
     const invertSwitch = document.getElementById("invertSwitch");
 
     function setFrontSize(px) {
@@ -2225,16 +2434,26 @@
       localStorage.setItem("flashcards_author_size", px);
     }
 
+    function setDetailSize(px) {
+      document.documentElement.style.setProperty("--detail-size", `${px}px`);
+      detailSizeVal.textContent = `${px} px`;
+      detailSlider.value = px;
+      localStorage.setItem("flashcards_detail_size", px);
+    }
+
     const savedFront = localStorage.getItem("apolonio_front_size");
     const savedBack = localStorage.getItem("apolonio_back_size");
     const savedAuthor = localStorage.getItem("flashcards_author_size");
+    const savedDetail = localStorage.getItem("flashcards_detail_size");
     if (savedFront) setFrontSize(savedFront);
     if (savedBack) setBackSize(savedBack);
     if (savedAuthor) setAuthorSize(savedAuthor);
+    if (savedDetail) setDetailSize(savedDetail);
 
     frontSlider.addEventListener("input", (e) => setFrontSize(e.target.value));
     backSlider.addEventListener("input", (e) => setBackSize(e.target.value));
     authorSlider.addEventListener("input", (e) => setAuthorSize(e.target.value));
+    detailSlider.addEventListener("input", (e) => setDetailSize(e.target.value));
 
     invertSwitch.classList.toggle("on", isInverted);
     document.getElementById("invertRow").addEventListener("click", () => {
