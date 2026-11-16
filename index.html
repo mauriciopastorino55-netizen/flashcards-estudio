@@ -1629,6 +1629,7 @@
 
     const S1 = "./emojis-literatura.png";
     const S2 = "./emojis-poesia.png";
+    const S3 = "./emojis-frayluis.png";
     const SPRITE_GRID = [
       // Lámina 1: literatura general
       { key: "cruz",      sheet: S1, pos: [0, 0], kw: ["cristian", "humanismo cristiano", "bautism", "iglesia", "religi"] },
@@ -1663,7 +1664,24 @@
       { key: "laud",      sheet: S2, pos: [0, 3], kw: ["mester", "juglar", "docere", "delectare", "canto", "laúd", "laud"] },
       { key: "caliz",     sheet: S2, pos: [1, 3], kw: ["cáliz", "caliz", "sacram", "eucarist", "rito"] },
       { key: "rosa",      sheet: S2, pos: [2, 3], kw: ["rosa", "juventud", "primavera", "flor", "belleza efímera"] },
-      { key: "tintero",   sheet: S2, pos: [3, 3], kw: ["tmesis", "fónico", "fonico", "métrica", "metrica", "cuaderna", "retórica", "retorica", "estrofa"] }
+      { key: "tintero",   sheet: S2, pos: [3, 3], kw: ["tmesis", "fónico", "fonico", "métrica", "metrica", "cuaderna", "retórica", "retorica", "estrofa"] },
+      // Lámina 3: Fray Luis y Siglo de Oro
+      { key: "codice",       sheet: S3, pos: [0, 0], kw: ["humanismo cristiano", "códice", "codice", "grecolatino"] },
+      { key: "cabana",       sheet: S3, pos: [1, 0], kw: ["beatus ille", "cabaña", "cabana", "campesina", "apartamiento"] },
+      { key: "fuente",       sheet: S3, pos: [2, 0], kw: ["otium", "purgación", "purgacion", "fuente", "serenidad"] },
+      { key: "tijeras",      sheet: S3, pos: [3, 0], kw: ["tmesis", "corte", "tijeras", "encabalgamiento"] },
+      { key: "nota",         sheet: S3, pos: [0, 1], kw: ["auditiv", "son dulce", "nota", "acordado", "ruido"] },
+      { key: "escala",       sheet: S3, pos: [1, 1], kw: ["tres vías", "tres vias", "escala", "conocimiento de dios"] },
+      { key: "ruina",        sheet: S3, pos: [2, 1], kw: ["soberbia", "profecía del tajo", "profecia del tajo", "ruina"] },
+      { key: "noche",        sheet: S3, pos: [3, 1], kw: ["noche serena", "dualismo neoplatónico", "dualismo neoplatonico", "astros"] },
+      { key: "reloj_arena",  sheet: S3, pos: [0, 2], kw: ["carpe diem", "fugacidad", "magdalena", "reloj de arena"] },
+      { key: "cruz_radiante",sheet: S3, pos: [1, 2], kw: ["mística", "mistica", "elevación", "elevacion", "cruz radiante"] },
+      { key: "astrolabio",   sheet: S3, pos: [2, 2], kw: ["astrolabio", "salinas", "esferas", "armonía celeste"] },
+      { key: "olivo",        sheet: S3, pos: [3, 2], kw: ["olivo", "amable paz", "paz interior"] },
+      { key: "vela",         sheet: S3, pos: [0, 3], kw: ["vela", "vigilia", "recogimiento"] },
+      { key: "velero",       sheet: S3, pos: [1, 3], kw: ["velero", "falso leño", "navegación", "navegacion"] },
+      { key: "cipres",       sheet: S3, pos: [2, 3], kw: ["ciprés", "cipres", "elegía", "elegia", "ascetismo"] },
+      { key: "espiga",       sheet: S3, pos: [3, 3], kw: ["espiga", "fruto cierto", "cosecha"] }
     ];
 
     function assignDeckSprites(deckItems) {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flashcards-estudio-v37';
+const CACHE_NAME = 'flashcards-estudio-v38';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,8 @@ const ASSETS = [
   './icon-maskable-192.png',
   './icon-maskable-512.png',
   './emojis-literatura.png',
-  './emojis-poesia.png'
+  './emojis-poesia.png',
+  './emojis-frayluis.png'
 ];
 
 self.addEventListener('install', event => {
