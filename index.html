@@ -431,6 +431,27 @@
       display: block;
     }
 
+    .concept-emoji {
+      display: none;
+      width: 74px;
+      height: 74px;
+      margin: 4px auto 0;
+      background-image: url('./emojis-literatura.png');
+      background-size: 400% 400%;
+      background-repeat: no-repeat;
+      filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    .face.is-concept-face .concept-emoji.has-emoji {
+      display: block;
+    }
+
+    body.hide-concept-emoji .concept-emoji {
+      display: none !important;
+    }
+
     .face-header {
       display: flex;
       align-items: center;
@@ -1161,6 +1182,7 @@
               <div class="face-body">
                 <div class="face-center-wrap">
                   <div class="style-def" id="frontText"></div>
+                  <div class="concept-emoji" id="frontEmoji"></div>
                   <div class="author-pill" id="frontAuthorPill"></div>
                 </div>
               </div>
@@ -1175,6 +1197,7 @@
               <div class="face-body">
                 <div class="face-center-wrap">
                   <div class="style-concept" id="backText"></div>
+                  <div class="concept-emoji" id="backEmoji"></div>
                   <div class="author-pill" id="backAuthorPill"></div>
                 </div>
               </div>
@@ -1192,6 +1215,7 @@
             <div class="face-body">
               <div class="face-center-wrap">
                 <div class="style-def" id="peekText"></div>
+                <div class="concept-emoji" id="peekEmoji"></div>
                 <div class="author-pill" id="peekAuthorPill"></div>
               </div>
             </div>
@@ -1288,6 +1312,11 @@
       <div class="switch" id="defTagSwitch"></div>
     </div>
 
+    <div class="toggle-row" id="conceptEmojiRow">
+      <span>Emoji 3D en Concepto</span>
+      <div class="switch" id="conceptEmojiSwitch"></div>
+    </div>
+
     <div class="slider-group">
       <div class="slider-label">
         <span>Velocidad de paso (↑/↓)</span>
@@ -1306,25 +1335,25 @@
 
   <script>
     const DEFAULT_ITEMS = [
-      { id: 1, topic: "Cristianización", authors: "", def: "Es la adaptación de una historia pagana (la novela griega/latina Historia Apollonii Regis Tyri) al marco cristiano del siglo XIII. Se ve cuando el texto transforma elementos paganos o de aventura en signos religiosos: los tres días de Luciana en el mar (resurrección), el templo de Diana convertido en monasterio, la fiesta de Neptuno cambiada por el cumpleaños de Apolonio, el episodio del pescador o el ángel del final." },
-      { id: 2, topic: "Género (Novela de aventuras y hagiografía)", authors: "Brownlee · Deyermond · Zubillaga", def: "La obra cruza la novela griega de aventuras (viajes, naufragios, separaciones y reencuentros familiares) con la hagiografía (vidas de santos). Según Brownlee, no es un género puro sino una mezcla propia del mester de clerecía; según Zubillaga, Luciana y sobre todo Tarsiana siguen más de cerca el modelo de las santas cristianas, mientras que Apolonio debe hacer todo un recorrido de aprendizaje para llegar a esa sabiduría." },
-      { id: 3, topic: "Mester de clerecía y docere et delectare", authors: "", def: "Los clérigos buscan diferenciarse tanto de los monjes como de los juglares demostrando que pueden entretener (delectare) y enseñar (docere) al mismo tiempo. En el texto aparece en los juegos cortesanos, la música y las adivinanzas (que divierten y exigen ingenio tanto a los personajes como al lector), y en Tarsiana cuando elige ser juglaresa por ser un \"mester más sin pecado\" que la prostitución, siempre manteniendo una base letrada y noble." },
-      { id: 4, topic: "Ideal clerical / Erudición vs. sabiduría espiritual", authors: "", def: "Los protagonistas no resuelven las cosas con la espada sino con la erudición, la retórica y la música. Sin embargo, el texto marca que el saber intelectual y terrenal por sí solo no alcanza (como le pasa a Apolonio al principio); el verdadero ideal clerical une esa educación con la sabiduría espiritual orientada hacia Dios." },
-      { id: 5, topic: "Providencia vs. Fortuna", authors: "", def: "La Fortuna es la visión pagana y mundana del azar (la rueda que sube y baja, como plantean Estrángilo y Dionisia). La Providencia es el plan de Dios que guía los hechos aunque los personajes no lo vean; en la obra no opera con milagros sobrenaturales sino a través de hechos humanos o naturales (el viento que lleva el ataúd a Éfeso, el médico, los piratas, Antinágoras)." },
-      { id: 6, topic: "El mar como metáfora bautismal", authors: "Zubillaga", def: "El paso por el agua funciona como muerte simbólica y renacimiento hacia una nueva identidad espiritual. Apolonio naufraga y renace como peregrino; Luciana pasa tres días en el mar y renace como monja; Tarsiana es llevada por mar y pasa a defender su virginidad en una nueva prueba." },
-      { id: 7, topic: "Verdad y apariencia (corteza y meollo)", authors: "", def: "Es la oposición entre lo que se muestra por fuera y lo que realmente es, obligando a saber mirar más allá de las apariencias. Aparece en el pescador (pobre por fuera, sabio por dentro), en Apolonio (rey disfrazado de romero), en Tarsiana (princesa con aspecto de juglaresa), en Dionisia (que cree que la ropa da virtud) y en el cuerpo aparentemente muerto de Luciana." },
-      { id: 8, topic: "La escritura y los monumentos", authors: "", def: "La escritura y las inscripciones aparecen como capas que cifran una verdad o una identidad oculta que otro debe descifrar. Se ve en la carta cerrada con cera de Luciana, en la lámina de plomo del ataúd y en los monumentos: el de Apolonio en Tarso (que él lee mal), la tumba falsa de Tarsiana (donde Apolonio ya sabe ver la mentira) y la estatua de oro final en Mitilene (donde por fin coinciden apariencia y verdad)." },
-      { id: 9, topic: "Adivinanzas y retórica", authors: "Rodríguez Temperley · Phipps", def: "Las adivinanzas funcionan como ejercicio retórico, prueba de ingenio y cifra de identidades. Según Rodríguez Temperley, en la serie de Tarsiana las primeras seis remiten al agua/viajes y a la clerecía, mientras que las últimas tres (la pelota, el espejo y las ruedas) preanuncian la anagnórisis: muestran que ninguno es lo que parece, que padre e hija se reflejan sin reconocerse y que existe el peligro del incesto o de una familia que no logra juntarse." },
-      { id: 10, topic: "El incesto como motivo folclórico", authors: "Phipps · Deyermond", def: "Es el motivo folclórico central de la obra según Phipps. Aparece de forma explícita al principio con Antíoco y su hija, y luego queda como una amenaza latente sobre las demás relaciones padre-hija (como el juego de seducción intelectual entre Apolonio y Tarsiana antes de reconocerse, o el rol ambiguo de Antinágoras). Sirve para contrastar a los personajes que caen en el mal con los que logran evitarlo." },
-      { id: 11, topic: "La belleza incomparable de las princesas (motivo folclórico)", authors: "Deyermond", def: "Es un tópico folclórico tradicional por el cual la heroína supera a todas las demás mujeres en hermosura. Se aplica a la hija de Antíoco, a Luciana y a Tarsiana. En el Libro de Apolonio, el poeta lo combina con el ideal clerical: a Tarsiana no la quieren solo por linda, sino también por su educación y buenos modales." },
-      { id: 12, topic: "La madrastra envidiosa (motivo folclórico)", authors: "", def: "Es el esquema folclórico de la figura materna sustituta que odia y quiere eliminar a la joven protegida porque opaca a su propia hija. Lo encarna Dionisia respecto de Tarsiana cuando la gente en la calle las compara. En la obra, este motivo folclórico funciona como disparador narrativo que pone en marcha la aventura de Tarsiana." },
-      { id: 13, topic: "La muerte aparente (motivo folclórico)", authors: "Zubillaga", def: "Es el motivo tradicional del personaje que parece muerto sin estarlo, es abandonado o enterrado y luego vuelve a la vida. Aparece con Luciana tras el parto en el barco. El poeta toma este motivo folclórico y lo adapta agregando la explicación médica (sabiduría científica) y la simbología cristiana de los tres días en el mar." },
-      { id: 14, topic: "La prueba de pretendientes / casamiento desigual (motivo folclórico)", authors: "", def: "Es el motivo folclórico de la princesa que debe elegir esposo entre varios candidatos mediante pruebas o acertijos, o que elige a alguien de apariencia inferior (un maestro o peregrino) por encima de nobles ricos. Aparece tanto en Antioquía (el enigma de Antíoco) como en Pentápolis, donde Luciana rechaza a los tres pretendientes y elige casarse con Apolonio mediante una carta con acertijo." },
-      { id: 15, topic: "El pecado en cadena, el diablo y el dinero", authors: "", def: "El mal funciona como una cadena donde un pecado lleva a otro, impulsado por el diablo y ligado al dinero. Se ve en Antíoco (incesto y recompensa por matar a Apolonio) y en Dionisia y Estrángilo, caracterizados como burgueses vinculados al dinero y la avaricia: la envidia lleva al intento de asesinato, al engaño y a querer matar al sicario para no pagarle." },
-      { id: 16, topic: "Educación y rol femenino: Luciana y Tarsiana", authors: "Balestrini · Zubillaga", def: "Las mujeres funcionan en pares con los hombres y encarnan el ideal clerical tanto como ellos (Balestrini destaca el detalle de la educación de Tarsiana). A diferencia de Apolonio, su peligro específico es la deshonra sexual y su saber (música y retórica) tiene un efecto curativo sobre la melancolía de Apolonio y les sirve para defender su castidad y virginidad sin violencia física." },
-      { id: 17, topic: "Peregrinatio vitae, peregrino y ascesis (imitatio Christi)", authors: "Brownlee · Surtz", def: "Es la idea de la vida como un viaje de prueba espiritual. Apolonio falla cuando se aferra a su condición de rey frente al cadáver de Luciana, por lo que luego pasa diez años de vida ascética en el desierto de Egipto (imitando la tradición bíblica y de los santos) para adquirir la sabiduría espiritual que le faltaba y poder reconocer la verdad al volver." },
-      { id: 18, topic: "La muerte igualadora y el cierre moralizante", authors: "", def: "Es el tópico medieval de que todos los hombres son iguales ante la muerte y el juicio de Dios (como recuerda Antinágoras en el burdel). Al final de la obra, el narrador interpela directamente al lector para recordarle que todos vamos a morir y que cada uno recibirá en el más allá según lo que haya obrado en vida." },
-      { id: 19, topic: "Métrica (cuaderna vía)", authors: "", def: "Es la forma métrica del mester de clerecía: estrofas de cuatro versos alejandrinos (14 sílabas divididas en dos hemistiquios de 7+7) con una única rima consonante por estrofa (AAAA). Busca una lectura pausada y lenta, por lo que suelen usarse licencias que separan vocales (dialefa y diéresis)." }
+      { id: 1, icon: "cruz", topic: "Cristianización", authors: "", def: "Es la adaptación de una historia pagana (la novela griega/latina Historia Apollonii Regis Tyri) al marco cristiano del siglo XIII. Se ve cuando el texto transforma elementos paganos o de aventura en signos religiosos: los tres días de Luciana en el mar (resurrección), el templo de Diana convertido en monasterio, la fiesta de Neptuno cambiada por el cumpleaños de Apolonio, el episodio del pescador o el ángel del final." },
+      { id: 2, icon: "paloma", topic: "Género (Novela de aventuras y hagiografía)", authors: "Brownlee · Deyermond · Zubillaga", def: "La obra cruza la novela griega de aventuras (viajes, naufragios, separaciones y reencuentros familiares) con la hagiografía (vidas de santos). Según Brownlee, no es un género puro sino una mezcla propia del mester de clerecía; según Zubillaga, Luciana y sobre todo Tarsiana siguen más de cerca el modelo de las santas cristianas, mientras que Apolonio debe hacer todo un recorrido de aprendizaje para llegar a esa sabiduría." },
+      { id: 3, icon: "laud", topic: "Mester de clerecía y docere et delectare", authors: "", def: "Los clérigos buscan diferenciarse tanto de los monjes como de los juglares demostrando que pueden entretener (delectare) y enseñar (docere) al mismo tiempo. En el texto aparece en los juegos cortesanos, la música y las adivinanzas (que divierten y exigen ingenio tanto a los personajes como al lector), y en Tarsiana cuando elige ser juglaresa por ser un \"mester más sin pecado\" que la prostitución, siempre manteniendo una base letrada y noble." },
+      { id: 4, icon: "buho", topic: "Ideal clerical / Erudición vs. sabiduría espiritual", authors: "", def: "Los protagonistas no resuelven las cosas con la espada sino con la erudición, la retórica y la música. Sin embargo, el texto marca que el saber intelectual y terrenal por sí solo no alcanza (como le pasa a Apolonio al principio); el verdadero ideal clerical une esa educación con la sabiduría espiritual orientada hacia Dios." },
+      { id: 5, icon: "balanza", topic: "Providencia vs. Fortuna", authors: "", def: "La Fortuna es la visión pagana y mundana del azar (la rueda que sube y baja, como plantean Estrángilo y Dionisia). La Providencia es el plan de Dios que guía los hechos aunque los personajes no lo vean; en la obra no opera con milagros sobrenaturales sino a través de hechos humanos o naturales (el viento que lleva el ataúd a Éfeso, el médico, los piratas, Antinágoras)." },
+      { id: 6, icon: "mar", topic: "El mar como metáfora bautismal", authors: "Zubillaga", def: "El paso por el agua funciona como muerte simbólica y renacimiento hacia una nueva identidad espiritual. Apolonio naufraga y renace como peregrino; Luciana pasa tres días en el mar y renace como monja; Tarsiana es llevada por mar y pasa a defender su virginidad en una nueva prueba." },
+      { id: 7, icon: "mascara", topic: "Verdad y apariencia (corteza y meollo)", authors: "", def: "Es la oposición entre lo que se muestra por fuera y lo que realmente es, obligando a saber mirar más allá de las apariencias. Aparece en el pescador (pobre por fuera, sabio por dentro), en Apolonio (rey disfrazado de romero), en Tarsiana (princesa con aspecto de juglaresa), en Dionisia (que cree que la ropa da virtud) y en el cuerpo aparentemente muerto de Luciana." },
+      { id: 8, icon: "estatua", topic: "La escritura y los monumentos", authors: "", def: "La escritura y las inscripciones aparecen como capas que cifran una verdad o una identidad oculta que otro debe descifrar. Se ve en la carta cerrada con cera de Luciana, en la lámina de plomo del ataúd y en los monumentos: el de Apolonio en Tarso (que él lee mal), la tumba falsa de Tarsiana (donde Apolonio ya sabe ver la mentira) y la estatua de oro final en Mitilene (donde por fin coinciden apariencia y verdad)." },
+      { id: 9, icon: "llave", topic: "Adivinanzas y retórica", authors: "Rodríguez Temperley · Phipps", def: "Las adivinanzas funcionan como ejercicio retórico, prueba de ingenio y cifra de identidades. Según Rodríguez Temperley, en la serie de Tarsiana las primeras seis remiten al agua/viajes y a la clerecía, mientras que las últimas tres (la pelota, el espejo y las ruedas) preanuncian la anagnórisis: muestran que ninguno es lo que parece, que padre e hija se reflejan sin reconocerse y que existe el peligro del incesto o de una familia que no logra juntarse." },
+      { id: 10, icon: "fuego", topic: "El incesto como motivo folclórico", authors: "Phipps · Deyermond", def: "Es el motivo folclórico central de la obra según Phipps. Aparece de forma explícita al principio con Antíoco y su hija, y luego queda como una amenaza latente sobre las demás relaciones padre-hija (como el juego de seducción intelectual entre Apolonio y Tarsiana antes de reconocerse, o el rol ambiguo de Antinágoras). Sirve para contrastar a los personajes que caen en el mal con los que logran evitarlo." },
+      { id: 11, icon: "corona", topic: "La belleza incomparable de las princesas (motivo folclórico)", authors: "Deyermond", def: "Es un tópico folclórico tradicional por el cual la heroína supera a todas las demás mujeres en hermosura. Se aplica a la hija de Antíoco, a Luciana y a Tarsiana. En el Libro de Apolonio, el poeta lo combina con el ideal clerical: a Tarsiana no la quieren solo por linda, sino también por su educación y buenos modales." },
+      { id: 12, icon: "espejo", topic: "La madrastra envidiosa (motivo folclórico)", authors: "", def: "Es el esquema folclórico de la figura materna sustituta que odia y quiere eliminar a la joven protegida porque opaca a su propia hija. Lo encarna Dionisia respecto de Tarsiana cuando la gente en la calle las compara. En la obra, este motivo folclórico funciona como disparador narrativo que pone en marcha la aventura de Tarsiana." },
+      { id: 13, icon: "tumba", topic: "La muerte aparente (motivo folclórico)", authors: "Zubillaga", def: "Es el motivo tradicional del personaje que parece muerto sin estarlo, es abandonado o enterrado y luego vuelve a la vida. Aparece con Luciana tras el parto en el barco. El poeta toma este motivo folclórico y lo adapta agregando la explicación médica (sabiduría científica) y la simbología cristiana de los tres días en el mar." },
+      { id: 14, icon: "corazon", topic: "La prueba de pretendientes / casamiento desigual (motivo folclórico)", authors: "", def: "Es el motivo folclórico de la princesa que debe elegir esposo entre varios candidatos mediante pruebas o acertijos, o que elige a alguien de apariencia inferior (un maestro o peregrino) por encima de nobles ricos. Aparece tanto en Antioquía (el enigma de Antíoco) como en Pentápolis, donde Luciana rechaza a los tres pretendientes y elige casarse con Apolonio mediante una carta con acertijo." },
+      { id: 15, icon: "monedas", topic: "El pecado en cadena, el diablo y el dinero", authors: "", def: "El mal funciona como una cadena donde un pecado lleva a otro, impulsado por el diablo y ligado al dinero. Se ve en Antíoco (incesto y recompensa por matar a Apolonio) y en Dionisia y Estrángilo, caracterizados como burgueses vinculados al dinero y la avaricia: la envidia lleva al intento de asesinato, al engaño y a querer matar al sicario para no pagarle." },
+      { id: 16, icon: "lira", topic: "Educación y rol femenino: Luciana y Tarsiana", authors: "Balestrini · Zubillaga", def: "Las mujeres funcionan en pares con los hombres y encarnan el ideal clerical tanto como ellos (Balestrini destaca el detalle de la educación de Tarsiana). A diferencia de Apolonio, su peligro específico es la deshonra sexual y su saber (música y retórica) tiene un efecto curativo sobre la melancolía de Apolonio y les sirve para defender su castidad y virginidad sin violencia física." },
+      { id: 17, icon: "camino", topic: "Peregrinatio vitae, peregrino y ascesis (imitatio Christi)", authors: "Brownlee · Surtz", def: "Es la idea de la vida como un viaje de prueba espiritual. Apolonio falla cuando se aferra a su condición de rey frente al cadáver de Luciana, por lo que luego pasa diez años de vida ascética en el desierto de Egipto (imitando la tradición bíblica y de los santos) para adquirir la sabiduría espiritual que le faltaba y poder reconocer la verdad al volver." },
+      { id: 18, icon: "calavera", topic: "La muerte igualadora y el cierre moralizante", authors: "", def: "Es el tópico medieval de que todos los hombres son iguales ante la muerte y el juicio de Dios (como recuerda Antinágoras en el burdel). Al final de la obra, el narrador interpela directamente al lector para recordarle que todos vamos a morir y que cada uno recibirá en el más allá según lo que haya obrado en vida." },
+      { id: 19, icon: "tintero", topic: "Métrica (cuaderna vía)", authors: "", def: "Es la forma métrica del mester de clerecía: estrofas de cuatro versos alejandrinos (14 sílabas divididas en dos hemistiquios de 7+7) con una única rima consonante por estrofa (AAAA). Busca una lectura pausada y lenta, por lo que suelen usarse licencias que separan vocales (dialefa y diéresis)." }
     ];
 
     const PALETTES = [
@@ -1384,6 +1413,9 @@
     const frontDeckTag = document.getElementById("frontDeckTag");
     const backDeckTag = document.getElementById("backDeckTag");
     const peekDeckTag = document.getElementById("peekDeckTag");
+    const frontEmoji = document.getElementById("frontEmoji");
+    const backEmoji = document.getElementById("backEmoji");
+    const peekEmoji = document.getElementById("peekEmoji");
     const homeView = document.getElementById("homeView");
     const studyView = document.getElementById("studyView");
 
@@ -1459,6 +1491,13 @@
         let bodyText = currentBody.join("\n").trim();
         if (!bodyText) return;
 
+        let icon = "";
+        const iconMatch = bodyText.match(/(?:^|\n)Icono\s*:\s*(.+)$/i);
+        if (iconMatch) {
+          icon = iconMatch[1].trim().toLowerCase();
+          bodyText = bodyText.slice(0, iconMatch.index).trim();
+        }
+
         let authors = "";
         const authMatch = bodyText.match(/(?:^|\n)(?:Autores?|Cr[íi]ticos?)\s*:\s*(.+)$/i);
         if (authMatch) {
@@ -1473,6 +1512,7 @@
           id: parsed.length + 1,
           topic: cleanTitle,
           authors,
+          icon,
           def: cleanBody
         });
       };
@@ -1514,6 +1554,7 @@
       items = deck.items;
       activeFrontLabel = deck.frontLabel || "Definición";
       activeBackLabel = deck.backLabel || "Concepto";
+      assignDeckSprites(items);
       bag = [];
       lastId = null;
       history = [];
@@ -1586,6 +1627,90 @@
       }, 1650);
     }
 
+    const S1 = "./emojis-literatura.png";
+    const S2 = "./emojis-poesia.png";
+    const SPRITE_GRID = [
+      // Lámina 1: literatura general
+      { key: "cruz",      sheet: S1, pos: [0, 0], kw: ["cristian", "humanismo cristiano", "bautism", "iglesia", "religi"] },
+      { key: "lira",      sheet: S1, pos: [1, 0], kw: ["lira", "auditiv", "sonido", "música", "musica", "son dulce", "plectro"] },
+      { key: "huerto",    sheet: S1, pos: [2, 0], kw: ["huerto", "beatus ille", "jardín", "jardin", "naturaleza", "locus amoenus"] },
+      { key: "camino",    sheet: S1, pos: [3, 0], kw: ["lathe biosas", "senda", "peregrin", "camino", "retiro", "vida retirada"] },
+      { key: "mar",       sheet: S1, pos: [0, 1], kw: ["mar tempest", "naufrag", "falso leño", "mar como", "ola"] },
+      { key: "pergamino", sheet: S1, pos: [1, 1], kw: ["pergamino", "epístola", "epistola", "carta", "escritura", "género", "genero"] },
+      { key: "luna",      sheet: S1, pos: [2, 1], kw: ["noche serena", "astro", "estrella", "neoplat", "cielo nocturno"] },
+      { key: "corona",    sheet: S1, pos: [3, 1], kw: ["soberbia", "rey", "princesa", "monarca", "corona", "poder"] },
+      { key: "reloj",     sheet: S1, pos: [0, 2], kw: ["carpe diem", "fugacidad", "vejez", "paso del tiempo"] },
+      { key: "mascara",   sheet: S1, pos: [1, 2], kw: ["apariencia", "corteza y meollo", "engaño", "disfraz", "teatro"] },
+      { key: "fuego",     sheet: S1, pos: [2, 2], kw: ["fuego", "llama", "purgac", "pasión", "pasion", "infierno"] },
+      { key: "balanza",   sheet: S1, pos: [3, 2], kw: ["otium", "estoic", "ataraxia", "providencia", "fortuna", "justicia", "equilibrio"] },
+      { key: "espejo",    sheet: S1, pos: [0, 3], kw: ["espejo", "reflejo", "anagnór", "anagnor", "madrastra", "envidia"] },
+      { key: "espada",    sheet: S1, pos: [1, 3], kw: ["profecía del tajo", "invasión", "invasion", "espada", "guerra"] },
+      { key: "corazon",   sheet: S1, pos: [2, 3], kw: ["magdalena", "amor", "casamiento", "pretendient", "incesto", "afecto"] },
+      { key: "brujula",   sheet: S1, pos: [3, 3], kw: ["tres vías", "tres vias", "conocimiento de dios", "itinerario", "brújula", "brujula"] },
+      // Lámina 2: poesía y crítica
+      { key: "laurel",    sheet: S2, pos: [0, 0], kw: ["renacimiento", "laurel", "horacio", "horacian", "garcilaso", "fama"] },
+      { key: "buho",      sheet: S2, pos: [1, 0], kw: ["erudición", "erudicion", "ideal clerical", "sabiduría", "sabiduria", "búho", "buho"] },
+      { key: "cadena",    sheet: S2, pos: [2, 0], kw: ["cadena", "cárcel", "carcel", "esclav", "atadura", "prisión", "prision"] },
+      { key: "monedas",   sheet: S2, pos: [3, 0], kw: ["dinero", "codicia", "avaricia", "burgués", "burgues", "monedas"] },
+      { key: "tumba",     sheet: S2, pos: [0, 1], kw: ["muerte aparente", "tumba", "ataúd", "ataud", "sepulcro"] },
+      { key: "estatua",   sheet: S2, pos: [1, 1], kw: ["monumento", "estatua", "inscripc", "clásic", "clasic"] },
+      { key: "calavera",  sheet: S2, pos: [2, 1], kw: ["muerte igualadora", "vanitas", "calavera", "desengaño", "moralizante"] },
+      { key: "llave",     sheet: S2, pos: [3, 1], kw: ["adivinanza", "enigma", "cifra", "descifr", "secreto", "llave"] },
+      { key: "rio",       sheet: S2, pos: [0, 2], kw: ["tajo", "río", "rio", "corriente", "cauce"] },
+      { key: "torre",     sheet: S2, pos: [1, 2], kw: ["torre", "castillo", "fortaleza", "corte", "palacio"] },
+      { key: "paloma",    sheet: S2, pos: [2, 2], kw: ["hagiografía", "hagiografia", "espíritu", "espiritu", "paloma", "santa"] },
+      { key: "sol",       sheet: S2, pos: [3, 2], kw: ["luz", "sol", "ilumin", "resplandor", "aurora"] },
+      { key: "laud",      sheet: S2, pos: [0, 3], kw: ["mester", "juglar", "docere", "delectare", "canto", "laúd", "laud"] },
+      { key: "caliz",     sheet: S2, pos: [1, 3], kw: ["cáliz", "caliz", "sacram", "eucarist", "rito"] },
+      { key: "rosa",      sheet: S2, pos: [2, 3], kw: ["rosa", "juventud", "primavera", "flor", "belleza efímera"] },
+      { key: "tintero",   sheet: S2, pos: [3, 3], kw: ["tmesis", "fónico", "fonico", "métrica", "metrica", "cuaderna", "retórica", "retorica", "estrofa"] }
+    ];
+
+    function assignDeckSprites(deckItems) {
+      const used = new Set();
+      // Paso 1: respetar íconos explícitos únicos
+      deckItems.forEach(item => {
+        item._sprite = null;
+        if (item.icon) {
+          const s = SPRITE_GRID.find(g => g.key === item.icon);
+          if (s && !used.has(s.key)) {
+            item._sprite = s;
+            used.add(s.key);
+          }
+        }
+      });
+      // Paso 2: inferir por título sin repetir dentro del mazo
+      deckItems.forEach(item => {
+        if (item._sprite) return;
+        const title = (item.topic || "").toLowerCase();
+        const match = SPRITE_GRID.find(s => !used.has(s.key) && s.kw.some(k => title.includes(k)));
+        if (match) {
+          item._sprite = match;
+          used.add(match.key);
+        }
+      });
+      // Paso 3: si todavía falta, inferir por cuerpo solo si hay match único disponible
+      deckItems.forEach(item => {
+        if (item._sprite) return;
+        const body = (item.def || "").toLowerCase();
+        const match = SPRITE_GRID.find(s => !used.has(s.key) && s.kw.some(k => body.includes(k)));
+        if (match) {
+          item._sprite = match;
+          used.add(match.key);
+        }
+      });
+    }
+
+    function applyEmoji(el, sprite) {
+      if (sprite) {
+        el.style.backgroundImage = `url('${sprite.sheet}')`;
+        el.style.backgroundPosition = `${sprite.pos[0] * 33.3333}% ${sprite.pos[1] * 33.3333}%`;
+        el.classList.add("has-emoji");
+      } else {
+        el.classList.remove("has-emoji");
+      }
+    }
+
     function renderEntry(entry, number) {
       const { item, palette, round } = entry;
       const posInRound = ((number - 1) % items.length) + 1;
@@ -1594,6 +1719,7 @@
       backNum.textContent = counterStr;
       frontDeckTag.textContent = activeDeckName;
       backDeckTag.textContent = activeDeckName;
+      const spritePos = item._sprite || null;
 
       if (isInverted) {
         frontFace.classList.add("is-concept-face");
@@ -1608,6 +1734,8 @@
         backText.textContent = item.def;
         frontAuthorPill.textContent = item.authors || "";
         backAuthorPill.textContent = "";
+        applyEmoji(frontEmoji, spritePos);
+        applyEmoji(backEmoji, null);
       } else {
         frontFace.classList.remove("is-concept-face");
         frontFace.classList.add("is-def-face");
@@ -1621,6 +1749,8 @@
         backText.textContent = item.topic;
         frontAuthorPill.textContent = "";
         backAuthorPill.textContent = item.authors || "";
+        applyEmoji(frontEmoji, null);
+        applyEmoji(backEmoji, spritePos);
       }
       document.querySelectorAll(".face-body").forEach(el => (el.scrollTop = 0));
       applyPalette(palette);
@@ -1673,6 +1803,7 @@
         peekText.className = "style-concept";
         peekText.textContent = item.topic;
         peekAuthorPill.textContent = item.authors || "";
+        applyEmoji(peekEmoji, item._sprite || null);
       } else {
         peekFace.classList.remove("is-concept-face");
         peekFace.classList.add("is-def-face");
@@ -1680,6 +1811,7 @@
         peekText.className = "style-def";
         peekText.textContent = item.def;
         peekAuthorPill.textContent = "";
+        applyEmoji(peekEmoji, null);
       }
     }
 
@@ -2118,6 +2250,19 @@
       showDefTag = !showDefTag;
       localStorage.setItem("flashcards_def_tag_on", showDefTag ? "1" : "0");
       syncDefTag();
+    });
+
+    let showConceptEmoji = localStorage.getItem("flashcards_concept_emoji_on") !== "0";
+    const conceptEmojiSwitch = document.getElementById("conceptEmojiSwitch");
+    function syncConceptEmoji() {
+      conceptEmojiSwitch.classList.toggle("on", showConceptEmoji);
+      document.body.classList.toggle("hide-concept-emoji", !showConceptEmoji);
+    }
+    syncConceptEmoji();
+    document.getElementById("conceptEmojiRow").addEventListener("click", () => {
+      showConceptEmoji = !showConceptEmoji;
+      localStorage.setItem("flashcards_concept_emoji_on", showConceptEmoji ? "1" : "0");
+      syncConceptEmoji();
     });
 
     const slideSpeedSlider = document.getElementById("slideSpeedSlider");
