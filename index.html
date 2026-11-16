@@ -583,8 +583,25 @@
       display: block;
     }
 
-    body.hide-concept-emoji .concept-emoji {
+    body.hide-concept-emoji .concept-emoji,
+    body.hide-concept-emoji .header-emoji {
       display: none !important;
+    }
+
+    .header-emoji {
+      display: none;
+      width: 30px;
+      height: 30px;
+      background-image: url('./emojis-literatura.png');
+      background-size: 400% 400%;
+      background-repeat: no-repeat;
+      filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+
+    .face.is-def-face .header-emoji.has-emoji {
+      display: block;
     }
 
     .face-header {
@@ -1308,6 +1325,7 @@
             <div class="face face-front is-def-face" id="frontFace">
               <div class="face-header">
                 <span class="badge" id="frontBadge">Definición</span>
+                <div class="header-emoji" id="frontHeaderEmoji"></div>
                 <span class="badge counter-badge" id="frontNum">1/19 · V1</span>
               </div>
               <div class="face-body">
@@ -1323,6 +1341,7 @@
             <div class="face face-back is-concept-face" id="backFace">
               <div class="face-header">
                 <span class="badge" id="backBadge">Concepto</span>
+                <div class="header-emoji" id="backHeaderEmoji"></div>
                 <span class="badge counter-badge" id="backNum">1/19 · V1</span>
               </div>
               <div class="face-body">
@@ -1341,6 +1360,7 @@
           <div class="face is-def-face" id="peekFace">
             <div class="face-header">
               <span class="badge" id="peekBadge">Definición</span>
+              <div class="header-emoji" id="peekHeaderEmoji"></div>
               <span class="badge counter-badge" id="peekNum">2/19 · V1</span>
             </div>
             <div class="face-body">
@@ -1561,6 +1581,9 @@
     const frontEmoji = document.getElementById("frontEmoji");
     const backEmoji = document.getElementById("backEmoji");
     const peekEmoji = document.getElementById("peekEmoji");
+    const frontHeaderEmoji = document.getElementById("frontHeaderEmoji");
+    const backHeaderEmoji = document.getElementById("backHeaderEmoji");
+    const peekHeaderEmoji = document.getElementById("peekHeaderEmoji");
     const homeView = document.getElementById("homeView");
     const studyView = document.getElementById("studyView");
     const detailView = document.getElementById("detailView");
@@ -1953,6 +1976,8 @@
         backAuthorPill.textContent = "";
         applyEmoji(frontEmoji, spritePos);
         applyEmoji(backEmoji, null);
+        applyEmoji(frontHeaderEmoji, null);
+        applyEmoji(backHeaderEmoji, spritePos);
       } else {
         frontFace.classList.remove("is-concept-face");
         frontFace.classList.add("is-def-face");
@@ -1968,6 +1993,8 @@
         backAuthorPill.textContent = item.authors || "";
         applyEmoji(frontEmoji, null);
         applyEmoji(backEmoji, spritePos);
+        applyEmoji(frontHeaderEmoji, spritePos);
+        applyEmoji(backHeaderEmoji, null);
       }
       document.querySelectorAll(".face-body").forEach(el => (el.scrollTop = 0));
       cardWrapper.style.setProperty("--accent", palette[0]);
@@ -2023,6 +2050,7 @@
         peekText.textContent = item.topic;
         peekAuthorPill.textContent = item.authors || "";
         applyEmoji(peekEmoji, item._sprite || null);
+        applyEmoji(peekHeaderEmoji, null);
       } else {
         peekFace.classList.remove("is-concept-face");
         peekFace.classList.add("is-def-face");
@@ -2031,6 +2059,7 @@
         peekText.textContent = item.def;
         peekAuthorPill.textContent = "";
         applyEmoji(peekEmoji, null);
+        applyEmoji(peekHeaderEmoji, item._sprite || null);
       }
     }
 
