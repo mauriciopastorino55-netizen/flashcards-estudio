@@ -139,7 +139,7 @@
     }
 
     .home-title {
-      font-size: 24px;
+      font-size: 27px;
       font-weight: 800;
       letter-spacing: -0.3px;
       background: linear-gradient(135deg, #ffffff 25%, var(--accent-2) 100%);
@@ -381,6 +381,37 @@
     }
 
     .face.is-concept-face .face-body {
+      padding: 16px 2px;
+    }
+
+    .concept-deck-tag {
+      display: none;
+      width: 100%;
+      flex-shrink: 0;
+      border-radius: 18px;
+      padding: 16px 20px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+      box-shadow: 0 10px 28px color-mix(in srgb, var(--accent) 35%, transparent);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .face.is-concept-face .concept-deck-tag {
+      display: block;
+    }
+
+    body.hide-deck-tag .concept-deck-tag {
+      display: none !important;
+    }
+
+    body.hide-deck-tag .face.is-concept-face .face-body {
       padding: 8px 2px 32px;
     }
 
@@ -756,8 +787,8 @@
       background: color-mix(in srgb, var(--accent-2) 10%, transparent);
       color: var(--text);
       border-radius: 14px;
-      padding: 13px 12px;
-      font-size: 14px;
+      padding: 14px 12px;
+      font-size: 15.5px;
       font-weight: 700;
       text-align: center;
       cursor: pointer;
@@ -768,8 +799,8 @@
       background: rgba(255, 255, 255, 0.06);
       color: var(--text);
       border-radius: 14px;
-      padding: 13px 14px;
-      font-size: 14px;
+      padding: 14px 15px;
+      font-size: 15.5px;
       font-weight: 700;
       cursor: pointer;
       flex-shrink: 0;
@@ -821,7 +852,7 @@
       align-items: center;
       flex-wrap: wrap;
       gap: 4px;
-      font-size: 12px;
+      font-size: 13.5px;
       color: var(--muted);
       margin-top: -8px;
       flex-shrink: 0;
@@ -832,7 +863,7 @@
       border: none;
       padding: 2px 4px;
       color: var(--accent-2);
-      font-size: 12px;
+      font-size: 13.5px;
       font-weight: 600;
       cursor: pointer;
     }
@@ -848,7 +879,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 14px 16px;
+      padding: 15px 16px;
       border-radius: 14px;
       background: rgba(255, 255, 255, 0.045);
       border: 1px solid rgba(255, 255, 255, 0.11);
@@ -863,7 +894,7 @@
     }
 
     .folder-name {
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
@@ -872,7 +903,7 @@
     }
 
     .folder-arrow {
-      font-size: 16px;
+      font-size: 19px;
       color: var(--muted);
       flex-shrink: 0;
     }
@@ -882,7 +913,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 12px 14px;
+      padding: 14px 15px;
       border-radius: 14px;
       background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.09);
@@ -901,7 +932,7 @@
     }
 
     .deck-name {
-      font-size: 15px;
+      font-size: 16.5px;
       font-weight: 700;
       white-space: nowrap;
       overflow: hidden;
@@ -909,9 +940,9 @@
     }
 
     .deck-meta {
-      font-size: 12px;
+      font-size: 13.5px;
       color: var(--muted);
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .deck-actions {
@@ -926,8 +957,8 @@
       border: 1px solid rgba(255, 255, 255, 0.14);
       color: var(--text);
       border-radius: 10px;
-      padding: 6px 9px;
-      font-size: 12px;
+      padding: 7px 11px;
+      font-size: 13.5px;
       font-weight: 600;
       cursor: pointer;
       flex-shrink: 0;
@@ -938,8 +969,8 @@
       border: 1px solid rgba(255, 80, 100, 0.35);
       color: #ff8fa3;
       border-radius: 10px;
-      padding: 6px 10px;
-      font-size: 12px;
+      padding: 7px 11px;
+      font-size: 13.5px;
       font-weight: 700;
       cursor: pointer;
       flex-shrink: 0;
@@ -1070,7 +1101,6 @@
     <section class="home-view" id="homeView">
       <header class="home-header">
         <div class="home-title-wrap">
-          <button type="button" class="btn-icon view-hidden" id="folderBackBtn" aria-label="Subir carpeta" style="padding:7px 10px;">←</button>
           <div class="home-title" id="homeTitle">Mazos</div>
         </div>
         <div class="home-header-actions">
@@ -1115,6 +1145,7 @@
                   <div class="author-pill" id="frontAuthorPill"></div>
                 </div>
               </div>
+              <div class="concept-deck-tag" id="frontDeckTag"></div>
             </div>
 
             <div class="face face-back is-concept-face" id="backFace">
@@ -1128,6 +1159,7 @@
                   <div class="author-pill" id="backAuthorPill"></div>
                 </div>
               </div>
+              <div class="concept-deck-tag" id="backDeckTag"></div>
             </div>
           </div>
         </div>
@@ -1144,6 +1176,7 @@
                 <div class="author-pill" id="peekAuthorPill"></div>
               </div>
             </div>
+            <div class="concept-deck-tag" id="peekDeckTag"></div>
           </div>
         </div>
       </main>
@@ -1226,6 +1259,11 @@
       <div class="switch" id="invertSwitch"></div>
     </div>
 
+    <div class="toggle-row" id="deckTagRow">
+      <span>Etiqueta de obra en Concepto</span>
+      <div class="switch" id="deckTagSwitch"></div>
+    </div>
+
     <div class="slider-group">
       <div class="slider-label">
         <span>Velocidad de paso (↑/↓)</span>
@@ -1287,6 +1325,7 @@
     if (decks.length === 0) activeDeckId = "";
 
     let items = [];
+    let activeDeckName = "";
     let activeFrontLabel = "Definición";
     let activeBackLabel = "Concepto";
     let bag = [];
@@ -1318,6 +1357,9 @@
     const backAuthorPill = document.getElementById("backAuthorPill");
     const frontNum = document.getElementById("frontNum");
     const backNum = document.getElementById("backNum");
+    const frontDeckTag = document.getElementById("frontDeckTag");
+    const backDeckTag = document.getElementById("backDeckTag");
+    const peekDeckTag = document.getElementById("peekDeckTag");
     const homeView = document.getElementById("homeView");
     const studyView = document.getElementById("studyView");
 
@@ -1443,6 +1485,7 @@
       }
       const deck = decks.find(d => d.id === deckId) || decks[0];
       activeDeckId = deck.id;
+      activeDeckName = deck.name || "";
       localStorage.setItem(STORAGE_ACTIVE_KEY, activeDeckId);
       items = deck.items;
       activeFrontLabel = deck.frontLabel || "Definición";
@@ -1525,6 +1568,8 @@
       const counterStr = `${posInRound}/${items.length} · V${round + 1}`;
       frontNum.textContent = counterStr;
       backNum.textContent = counterStr;
+      frontDeckTag.textContent = activeDeckName;
+      backDeckTag.textContent = activeDeckName;
 
       if (isInverted) {
         frontFace.classList.add("is-concept-face");
@@ -1593,6 +1638,7 @@
       const { item, palette, round } = entry;
       const posInRound = ((number - 1) % items.length) + 1;
       peekNum.textContent = `${posInRound}/${items.length} · V${round + 1}`;
+      peekDeckTag.textContent = activeDeckName;
       peekWrapper.style.setProperty("--accent", palette[0]);
       peekWrapper.style.setProperty("--accent-2", palette[1]);
 
@@ -2024,6 +2070,19 @@
       if (history[historyIndex]) renderEntry(history[historyIndex], historyIndex + 1);
     });
 
+    let showDeckTag = localStorage.getItem("flashcards_deck_tag_on") !== "0";
+    const deckTagSwitch = document.getElementById("deckTagSwitch");
+    function syncDeckTag() {
+      deckTagSwitch.classList.toggle("on", showDeckTag);
+      document.body.classList.toggle("hide-deck-tag", !showDeckTag);
+    }
+    syncDeckTag();
+    document.getElementById("deckTagRow").addEventListener("click", () => {
+      showDeckTag = !showDeckTag;
+      localStorage.setItem("flashcards_deck_tag_on", showDeckTag ? "1" : "0");
+      syncDeckTag();
+    });
+
     const slideSpeedSlider = document.getElementById("slideSpeedSlider");
     const slideSpeedVal = document.getElementById("slideSpeedVal");
 
@@ -2277,18 +2336,11 @@
       });
     });
 
-    const folderBackBtn = document.getElementById("folderBackBtn");
     const homeTitle = document.getElementById("homeTitle");
+    const openSettingsBtn = document.getElementById("openSettings");
     const folderRenameBtn = document.getElementById("folderRenameBtn");
     const folderDeleteBtn = document.getElementById("folderDeleteBtn");
     const folderBreadcrumb = document.getElementById("folderBreadcrumb");
-
-    folderBackBtn.addEventListener("click", () => {
-      if (currentFolderId) lastFolderId = currentFolderId;
-      const cur = folders.find(f => f.id === currentFolderId);
-      currentFolderId = cur ? (cur.parentId || null) : null;
-      renderDeckList();
-    });
 
     folderRenameBtn.addEventListener("click", () => {
       const cur = folders.find(f => f.id === currentFolderId);
@@ -2379,7 +2431,7 @@
 
       const curFolder = currentFolderId ? folders.find(f => f.id === currentFolderId) : null;
       homeTitle.textContent = curFolder ? curFolder.name : "Mazos";
-      folderBackBtn.classList.toggle("view-hidden", !curFolder);
+      openSettingsBtn.classList.toggle("view-hidden", !!curFolder);
       folderRenameBtn.classList.toggle("view-hidden", !curFolder);
       folderDeleteBtn.classList.toggle("view-hidden", !curFolder);
 
