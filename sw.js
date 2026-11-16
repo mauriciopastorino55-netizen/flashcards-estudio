@@ -1,4 +1,4 @@
-const CACHE_NAME = 'flashcards-estudio-v43';
+const CACHE_NAME = 'flashcards-estudio-v44';
 const ASSETS = [
   './',
   './index.html',
@@ -54,7 +54,7 @@ self.addEventListener('fetch', event => {
   const isHtml = event.request.mode === 'navigate' || event.request.url.endsWith('.html') || event.request.url.endsWith('/');
   if (isHtml) {
     event.respondWith(
-      fetch(event.request)
+      fetch(event.request.url, { cache: 'no-store' })
         .then(response => {
           if (response && response.status === 200) {
             const clone = response.clone();
