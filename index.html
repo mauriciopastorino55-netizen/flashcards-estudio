@@ -131,11 +131,23 @@
     }
 
     .home-header {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
       flex-shrink: 0;
+    }
+
+    .home-header.is-root .home-title-wrap {
+      justify-content: center;
+    }
+
+    .home-header.is-root .home-header-actions {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     .home-title {
@@ -415,6 +427,10 @@
       padding: 8px 2px 32px;
     }
 
+    body.show-def-tag .face.is-def-face .concept-deck-tag {
+      display: block;
+    }
+
     .face-header {
       display: flex;
       align-items: center;
@@ -484,7 +500,10 @@
       line-height: 1.48;
       color: var(--text);
       font-weight: 450;
-      text-align: left;
+      text-align: justify;
+      hyphens: auto;
+      -webkit-hyphens: auto;
+      hyphenate-limit-chars: 6 3 2;
       width: 100%;
     }
 
@@ -1099,7 +1118,7 @@
   <div class="app">
     <!-- Pantalla de Inicio (Mazos) -->
     <section class="home-view" id="homeView">
-      <header class="home-header">
+      <header class="home-header is-root" id="homeHeader">
         <div class="home-title-wrap">
           <div class="home-title" id="homeTitle">Mazos</div>
         </div>
@@ -1262,6 +1281,11 @@
     <div class="toggle-row" id="deckTagRow">
       <span>Etiqueta de obra en Concepto</span>
       <div class="switch" id="deckTagSwitch"></div>
+    </div>
+
+    <div class="toggle-row" id="defTagRow">
+      <span>Etiqueta de obra en Definición</span>
+      <div class="switch" id="defTagSwitch"></div>
     </div>
 
     <div class="slider-group">
@@ -2083,6 +2107,19 @@
       syncDeckTag();
     });
 
+    let showDefTag = localStorage.getItem("flashcards_def_tag_on") === "1";
+    const defTagSwitch = document.getElementById("defTagSwitch");
+    function syncDefTag() {
+      defTagSwitch.classList.toggle("on", showDefTag);
+      document.body.classList.toggle("show-def-tag", showDefTag);
+    }
+    syncDefTag();
+    document.getElementById("defTagRow").addEventListener("click", () => {
+      showDefTag = !showDefTag;
+      localStorage.setItem("flashcards_def_tag_on", showDefTag ? "1" : "0");
+      syncDefTag();
+    });
+
     const slideSpeedSlider = document.getElementById("slideSpeedSlider");
     const slideSpeedVal = document.getElementById("slideSpeedVal");
 
@@ -2336,6 +2373,7 @@
       });
     });
 
+    const homeHeader = document.getElementById("homeHeader");
     const homeTitle = document.getElementById("homeTitle");
     const openSettingsBtn = document.getElementById("openSettings");
     const folderRenameBtn = document.getElementById("folderRenameBtn");
@@ -2431,6 +2469,7 @@
 
       const curFolder = currentFolderId ? folders.find(f => f.id === currentFolderId) : null;
       homeTitle.textContent = curFolder ? curFolder.name : "Mazos";
+      homeHeader.classList.toggle("is-root", !curFolder);
       openSettingsBtn.classList.toggle("view-hidden", !!curFolder);
       folderRenameBtn.classList.toggle("view-hidden", !curFolder);
       folderDeleteBtn.classList.toggle("view-hidden", !curFolder);
