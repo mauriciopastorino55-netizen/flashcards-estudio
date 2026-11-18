@@ -1901,8 +1901,8 @@
           bodyText = bodyText.slice(0, devMatch.index).trim();
         }
 
-        const cleanTitle = currentTitle.replace(/^\d+[\.\)]\s*/, "").replace(/[*_`]/g, "").trim();
-        const cleanMd = (s) => s.replace(/\*\*([^*]+)\*\*/g, "$1").replace(/\*([^*]+)\*/g, "$1").replace(/`([^`]+)`/g, "$1");
+        const cleanTitle = currentTitle.replace(/^\d+[\.\)]\s*/, "").replace(/`/g, "").trim();
+        const cleanMd = (s) => s.replace(/`([^`]+)`/g, "$1");
 
         parsed.push({
           id: parsed.length + 1,
