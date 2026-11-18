@@ -1777,8 +1777,20 @@
       }
     }
 
+    function formatInlineMarkdown(text) {
+      if (!text) return "";
+      const escaped = String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+      return escaped
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*([^*\n]+)\*/g, "<em>$1</em>")
+        .replace(/(^|[^\w])_([^_\n]+)_([^\w]|$)/g, "$1<em>$2</em>$3");
+    }
+
     function showDetailView(item, fromSwipe = false) {
-      detailBody.textContent = item.detail || "";
+      detailBody.innerHTML = formatInlineMarkdown(item.detail || "");
       detailBody.scrollTop = 0;
       detailView.classList.remove("slide-out-right");
       if (fromSwipe) detailView.classList.add("slide-in-prep-right");
@@ -2169,8 +2181,8 @@
         backBadge.textContent = activeFrontLabel;
         frontText.className = "style-concept";
         backText.className = "style-def";
-        frontText.textContent = item.topic;
-        backText.textContent = item.def;
+        frontText.innerHTML = formatInlineMarkdown(item.topic);
+        backText.innerHTML = formatInlineMarkdown(item.def);
         frontAuthorPill.textContent = item.authors || "";
         backAuthorPill.textContent = "";
         applyEmoji(frontEmoji, spritePos);
@@ -2186,8 +2198,8 @@
         backBadge.textContent = activeBackLabel;
         frontText.className = "style-def";
         backText.className = "style-concept";
-        frontText.textContent = item.def;
-        backText.textContent = item.topic;
+        frontText.innerHTML = formatInlineMarkdown(item.def);
+        backText.innerHTML = formatInlineMarkdown(item.topic);
         frontAuthorPill.textContent = "";
         backAuthorPill.textContent = item.authors || "";
         applyEmoji(frontEmoji, null);
@@ -2246,7 +2258,7 @@
         peekFace.classList.remove("is-def-face");
         peekBadge.textContent = activeBackLabel;
         peekText.className = "style-concept";
-        peekText.textContent = item.topic;
+        peekText.innerHTML = formatInlineMarkdown(item.topic);
         peekAuthorPill.textContent = item.authors || "";
         applyEmoji(peekEmoji, item._sprite || null);
         applyEmoji(peekHeaderEmoji, null);
@@ -2255,7 +2267,7 @@
         peekFace.classList.add("is-def-face");
         peekBadge.textContent = activeFrontLabel;
         peekText.className = "style-def";
-        peekText.textContent = item.def;
+        peekText.innerHTML = formatInlineMarkdown(item.def);
         peekAuthorPill.textContent = "";
         applyEmoji(peekEmoji, null);
         applyEmoji(peekHeaderEmoji, item._sprite || null);
