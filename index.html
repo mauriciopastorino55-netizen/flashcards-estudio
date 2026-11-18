@@ -42,6 +42,7 @@
       --author-size: 16px;
       --detail-size: 17px;
       --concept-emoji-size: 74px;
+      --deck-tag-size: 16px;
       --card-fx-dur: 0.72s;
       --card-fx-int: 0.85;
       --card-fx-pct: 55%;
@@ -538,7 +539,7 @@
       flex-shrink: 0;
       border-radius: 18px;
       padding: 16px 20px;
-      font-size: 16px;
+      font-size: var(--deck-tag-size);
       font-weight: 700;
       color: #ffffff;
       text-align: center;
@@ -1571,6 +1572,14 @@
         <span id="detailSizeVal">17 px</span>
       </div>
       <input type="range" id="detailSlider" min="14" max="28" step="1" value="17" />
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-label">
+        <span>Tamaño de etiqueta inferior (obra/tema)</span>
+        <span id="deckTagSizeVal">16 px</span>
+      </div>
+      <input type="range" id="deckTagSizeSlider" min="12" max="26" step="1" value="16" />
     </div>
 
     <div class="slider-group">
@@ -2686,11 +2695,13 @@
     const authorSlider = document.getElementById("authorSlider");
     const detailSlider = document.getElementById("detailSlider");
     const emojiSizeSlider = document.getElementById("emojiSizeSlider");
+    const deckTagSizeSlider = document.getElementById("deckTagSizeSlider");
     const frontSizeVal = document.getElementById("frontSizeVal");
     const backSizeVal = document.getElementById("backSizeVal");
     const authorSizeVal = document.getElementById("authorSizeVal");
     const detailSizeVal = document.getElementById("detailSizeVal");
     const emojiSizeVal = document.getElementById("emojiSizeVal");
+    const deckTagSizeVal = document.getElementById("deckTagSizeVal");
     const invertSwitch = document.getElementById("invertSwitch");
 
     function setFrontSize(px) {
@@ -2728,22 +2739,32 @@
       localStorage.setItem("flashcards_concept_emoji_size", px);
     }
 
+    function setDeckTagSize(px) {
+      document.documentElement.style.setProperty("--deck-tag-size", `${px}px`);
+      deckTagSizeVal.textContent = `${px} px`;
+      deckTagSizeSlider.value = px;
+      localStorage.setItem("flashcards_deck_tag_size", px);
+    }
+
     const savedFront = localStorage.getItem("apolonio_front_size");
     const savedBack = localStorage.getItem("apolonio_back_size");
     const savedAuthor = localStorage.getItem("flashcards_author_size");
     const savedDetail = localStorage.getItem("flashcards_detail_size");
     const savedEmojiSize = localStorage.getItem("flashcards_concept_emoji_size");
+    const savedDeckTagSize = localStorage.getItem("flashcards_deck_tag_size");
     if (savedFront) setFrontSize(savedFront);
     if (savedBack) setBackSize(savedBack);
     if (savedAuthor) setAuthorSize(savedAuthor);
     if (savedDetail) setDetailSize(savedDetail);
     if (savedEmojiSize) setEmojiSize(savedEmojiSize);
+    if (savedDeckTagSize) setDeckTagSize(savedDeckTagSize);
 
     frontSlider.addEventListener("input", (e) => setFrontSize(e.target.value));
     backSlider.addEventListener("input", (e) => setBackSize(e.target.value));
     authorSlider.addEventListener("input", (e) => setAuthorSize(e.target.value));
     detailSlider.addEventListener("input", (e) => setDetailSize(e.target.value));
     emojiSizeSlider.addEventListener("input", (e) => setEmojiSize(e.target.value));
+    deckTagSizeSlider.addEventListener("input", (e) => setDeckTagSize(e.target.value));
 
     invertSwitch.classList.toggle("on", isInverted);
     document.getElementById("invertRow").addEventListener("click", () => {
