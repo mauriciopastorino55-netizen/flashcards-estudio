@@ -579,10 +579,29 @@
       filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
       pointer-events: none;
       flex-shrink: 0;
+      will-change: transform, filter;
+    }
+
+    @keyframes conceptEmojiFloat {
+      0%, 100% {
+        transform: translateY(2px) rotate(-1.5deg);
+        filter: drop-shadow(0 7px 14px rgba(0, 0, 0, 0.46));
+      }
+      50% {
+        transform: translateY(-8px) rotate(1.5deg);
+        filter: drop-shadow(0 15px 22px rgba(0, 0, 0, 0.30));
+      }
     }
 
     .face.is-concept-face .concept-emoji.has-emoji {
       display: block;
+      animation: conceptEmojiFloat 3.4s ease-in-out infinite;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .face.is-concept-face .concept-emoji.has-emoji {
+        animation: none;
+      }
     }
 
     body.hide-concept-emoji .concept-emoji,
