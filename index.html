@@ -42,6 +42,7 @@
       --author-size: 16px;
       --detail-size: 17px;
       --concept-emoji-size: 74px;
+      --emoji-float-dur: 3.4s;
       --deck-tag-size: 16px;
       --card-fx-dur: 0.72s;
       --card-fx-int: 0.85;
@@ -595,7 +596,11 @@
 
     .face.is-concept-face .concept-emoji.has-emoji {
       display: block;
-      animation: conceptEmojiFloat 3.4s ease-in-out infinite;
+      animation: conceptEmojiFloat var(--emoji-float-dur, 3.4s) ease-in-out infinite;
+    }
+
+    body.no-emoji-float .face.is-concept-face .concept-emoji.has-emoji {
+      animation: none;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -1662,6 +1667,20 @@
     <div class="toggle-row" id="conceptEmojiRow">
       <span>Emoji 3D en Concepto</span>
       <div class="switch" id="conceptEmojiSwitch"></div>
+    </div>
+
+    <div class="seg-group" id="emojiFloatSection">
+      <div class="seg-head" id="emojiFloatToggleRow">
+        <span class="seg-label">Flotación de emoji (Concepto)</span>
+        <div class="switch" id="emojiFloatSwitch"></div>
+      </div>
+      <div class="slider-group seg-speed">
+        <div class="slider-label">
+          <span>Velocidad de flotación</span>
+          <span id="emojiFloatSpeedVal">100% (Máx)</span>
+        </div>
+        <input type="range" id="emojiFloatSpeedSlider" min="20" max="100" step="5" value="100" />
+      </div>
     </div>
 
     <div class="slider-group">
@@ -2842,6 +2861,37 @@
       showConceptEmoji = !showConceptEmoji;
       localStorage.setItem("flashcards_concept_emoji_on", showConceptEmoji ? "1" : "0");
       syncConceptEmoji();
+    });
+
+    let emojiFloatEnabled = localStorage.getItem("flashcards_emoji_float_on") !== "0";
+    let emojiFloatSpeed = Number(localStorage.getItem("flashcards_emoji_float_speed") ?? 100);
+    if (!Number.isFinite(emojiFloatSpeed) || emojiFloatSpeed < 20 || emojiFloatSpeed > 100) emojiFloatSpeed = 100;
+    const emojiFloatSection = document.getElementById("emojiFloatSection");
+    const emojiFloatSwitch = document.getElementById("emojiFloatSwitch");
+    const emojiFloatSpeedSlider = document.getElementById("emojiFloatSpeedSlider");
+    const emojiFloatSpeedVal = document.getElementById("emojiFloatSpeedVal");
+
+    function syncEmojiFloat() {
+      emojiFloatSwitch.classList.toggle("on", emojiFloatEnabled);
+      emojiFloatSection.classList.toggle("is-disabled", !emojiFloatEnabled);
+      document.body.classList.toggle("no-emoji-float", !emojiFloatEnabled);
+      const dur = (3.4 / (emojiFloatSpeed / 100)).toFixed(2) + "s";
+      document.documentElement.style.setProperty("--emoji-float-dur", dur);
+      emojiFloatSpeedSlider.value = emojiFloatSpeed;
+      emojiFloatSpeedVal.textContent = emojiFloatSpeed === 100 ? "100% (Máx)" : `${emojiFloatSpeed}%`;
+    }
+    syncEmojiFloat();
+
+    document.getElementById("emojiFloatToggleRow").addEventListener("click", () => {
+      emojiFloatEnabled = !emojiFloatEnabled;
+      localStorage.setItem("flashcards_emoji_float_on", emojiFloatEnabled ? "1" : "0");
+      syncEmojiFloat();
+    });
+
+    emojiFloatSpeedSlider.addEventListener("input", (e) => {
+      emojiFloatSpeed = Number(e.target.value);
+      localStorage.setItem("flashcards_emoji_float_speed", emojiFloatSpeed);
+      syncEmojiFloat();
     });
 
     const slideSpeedSlider = document.getElementById("slideSpeedSlider");
