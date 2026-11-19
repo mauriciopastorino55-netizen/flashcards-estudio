@@ -43,6 +43,7 @@
       --detail-size: 17px;
       --concept-emoji-size: 74px;
       --emoji-float-dur: 3.4s;
+      --emoji-float-amp: 1;
       --deck-tag-size: 16px;
       --card-fx-dur: 0.72s;
       --card-fx-int: 0.85;
@@ -585,11 +586,11 @@
 
     @keyframes conceptEmojiFloat {
       0%, 100% {
-        transform: translateY(2px) rotate(-1.5deg);
+        transform: translateY(calc(2px * var(--emoji-float-amp, 1))) rotate(calc(-1.5deg * var(--emoji-float-amp, 1)));
         filter: drop-shadow(0 7px 14px rgba(0, 0, 0, 0.46));
       }
       50% {
-        transform: translateY(-8px) rotate(1.5deg);
+        transform: translateY(calc(-8px * var(--emoji-float-amp, 1))) rotate(calc(1.5deg * var(--emoji-float-amp, 1)));
         filter: drop-shadow(0 15px 22px rgba(0, 0, 0, 0.30));
       }
     }
@@ -1680,6 +1681,13 @@
           <span id="emojiFloatSpeedVal">100% (Máx)</span>
         </div>
         <input type="range" id="emojiFloatSpeedSlider" min="20" max="100" step="5" value="100" />
+      </div>
+      <div class="slider-group seg-speed">
+        <div class="slider-label">
+          <span>Amplitud / rango</span>
+          <span id="emojiFloatAmpVal">100% (Máx)</span>
+        </div>
+        <input type="range" id="emojiFloatAmpSlider" min="20" max="100" step="5" value="100" />
       </div>
     </div>
 
@@ -2866,10 +2874,14 @@
     let emojiFloatEnabled = localStorage.getItem("flashcards_emoji_float_on") !== "0";
     let emojiFloatSpeed = Number(localStorage.getItem("flashcards_emoji_float_speed") ?? 100);
     if (!Number.isFinite(emojiFloatSpeed) || emojiFloatSpeed < 20 || emojiFloatSpeed > 100) emojiFloatSpeed = 100;
+    let emojiFloatAmp = Number(localStorage.getItem("flashcards_emoji_float_amp") ?? 100);
+    if (!Number.isFinite(emojiFloatAmp) || emojiFloatAmp < 20 || emojiFloatAmp > 100) emojiFloatAmp = 100;
     const emojiFloatSection = document.getElementById("emojiFloatSection");
     const emojiFloatSwitch = document.getElementById("emojiFloatSwitch");
     const emojiFloatSpeedSlider = document.getElementById("emojiFloatSpeedSlider");
     const emojiFloatSpeedVal = document.getElementById("emojiFloatSpeedVal");
+    const emojiFloatAmpSlider = document.getElementById("emojiFloatAmpSlider");
+    const emojiFloatAmpVal = document.getElementById("emojiFloatAmpVal");
 
     function syncEmojiFloat() {
       emojiFloatSwitch.classList.toggle("on", emojiFloatEnabled);
@@ -2877,8 +2889,11 @@
       document.body.classList.toggle("no-emoji-float", !emojiFloatEnabled);
       const dur = (3.4 / (emojiFloatSpeed / 100)).toFixed(2) + "s";
       document.documentElement.style.setProperty("--emoji-float-dur", dur);
+      document.documentElement.style.setProperty("--emoji-float-amp", (emojiFloatAmp / 100).toFixed(2));
       emojiFloatSpeedSlider.value = emojiFloatSpeed;
       emojiFloatSpeedVal.textContent = emojiFloatSpeed === 100 ? "100% (Máx)" : `${emojiFloatSpeed}%`;
+      emojiFloatAmpSlider.value = emojiFloatAmp;
+      emojiFloatAmpVal.textContent = emojiFloatAmp === 100 ? "100% (Máx)" : `${emojiFloatAmp}%`;
     }
     syncEmojiFloat();
 
@@ -2891,6 +2906,12 @@
     emojiFloatSpeedSlider.addEventListener("input", (e) => {
       emojiFloatSpeed = Number(e.target.value);
       localStorage.setItem("flashcards_emoji_float_speed", emojiFloatSpeed);
+      syncEmojiFloat();
+    });
+
+    emojiFloatAmpSlider.addEventListener("input", (e) => {
+      emojiFloatAmp = Number(e.target.value);
+      localStorage.setItem("flashcards_emoji_float_amp", emojiFloatAmp);
       syncEmojiFloat();
     });
 
